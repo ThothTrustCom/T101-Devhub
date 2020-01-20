@@ -41,7 +41,7 @@ variants that the THETAKey devices that are available.
 The THETAKey subsystems available:
 * Secure display, input and windowing system
 * Protected RTC clock
-..* Protected Key Manager objects and credentials maybe tied to expiry timestamps to allow objects to be expired
+  * Protected Key Manager objects and credentials maybe tied to expiry timestamps to allow objects to be expired
 * Key Manager system
 * Open API
 * Global User Management Applet
