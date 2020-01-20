@@ -34,7 +34,7 @@ variants that the THETAKey devices that are available.
 * Internal dual chip MCU design with integrated Bluetooth LE in Controller MCU
 * RTC clock residing in Controller MCU
 * Re-chargeable internal battery using ISO-7816 contact pad for re-charging
-...* Uses conventional smart card readers with 5 volts to re-charge smart card battery over contact pad.
+  * Uses conventional smart card readers with 5 volts to re-charge smart card battery over contact pad.
 
 ## THETAKey Subsystems
 
