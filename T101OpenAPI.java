@@ -10,7 +10,7 @@ public interface T101OpenAPI extends Shareable {
     public static final short MAX_USERS_PER_OBJ = (short) 3;
     public static final short MAX_LIST_OBJ_CNT = (short) 10;
     public static final short MAX_KMAC_LEN = (short) 128;
-    public static final short MAX_GEN_MAT_LEN = (short) 512;
+    public static final short MAX_GEN_MAT_LEN = MAX_KMAC_LEN;
     public static final byte OBJ_TYPE_GENERIC = (byte) 0x01;
     public static final byte OBJ_TYPE_CRED = (byte) 0x02;
     public static final byte OBJ_TYPE_KEY = (byte) 0x03;
@@ -133,67 +133,67 @@ public interface T101OpenAPI extends Shareable {
     public static final byte UI_TYPE_LIST = (byte) 0x05;
     public static final byte NULL = ACL_ALLOW_EXEC;
 		
-    public boolean createAOCContainer(byte secretType, byte[] secret, short secretOffset, short secretLen, short maxRetry, byte[] name, short appNameOffset, short appNameLen, byte[] expireTS, short expOffset);
-
-    public boolean finalizeNewContainer(byte[] output, short outOffset);
-
-    public boolean destroyAOCContainer();
+	public boolean createAOCContainer(byte secretType, byte[] secret, short secretOffset, short secretLen, short maxRetry, byte[] name, short appNameOffset, short appNameLen, byte[] expireTS, short expOffset);	
 	
-    public boolean manageAOCContainer(byte fieldType, byte[] input, short offset, short len, byte[] output, short outOffset);
-
-    public short getAOCInfo(byte targetProfileFieldSearch, byte[] output, short outOffset);
-
-    public boolean newAOCUserCred(byte secretType, byte[] secret, short secOffset, short secLen, short maxRetry, byte[] username, short usernameOffset, short usernameLen, byte[] expireTS, short etsOffset, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte authMethod, byte[] output, short outOffset);
+	public boolean finalizeNewContainer(byte[] output, short outOffset);	
 	
-    public boolean manageUserCred(byte fieldType, byte[] input, short offset, short len, byte[] output, short outOffset, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte authMethod);
+	public boolean destroyAOCContainer();
+		
+	public boolean manageAOCContainer(byte fieldType, byte[] input, short offset, short len, byte[] output, short outOffset);	
 	
-    public boolean resetAOCUserCred(byte[] input, short offset, short len, byte[] username, short usernameOffset, short usernameLen, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte authMethod, byte[] output, short outOffset);	
+	public short getAOCInfo(byte targetProfileFieldSearch, byte[] output, short outOffset);									  
 	
-    public short listAOCUsers(byte credFieldType, byte[] credInput, short cOffset, short cLen,  byte[] output, short outOffset, byte authMethod);	
+	public boolean newAOCUserCred(byte secretType, byte[] secret, short secOffset, short secLen, short maxRetry, byte[] username, short usernameOffset, short usernameLen, byte[] expireTS, short etsOffset, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte authMethod, byte[] output, short outOffset);
+		
+	public boolean manageUserCred(byte fieldType, byte[] input, short offset, short len, byte[] output, short outOffset, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte authMethod);	
+	
+	public boolean resetAOCUserCred(byte[] input, short offset, short len, byte[] username, short usernameOffset, short usernameLen, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte authMethod, byte[] output, short outOffset);	
+	
+	public short listAOCUsers(byte credFieldType, byte[] credInput, short cOffset, short cLen,  byte[] output, short outOffset, byte authMethod);	
  	
-    public short getUserInfo(byte credFieldType, byte[] credInput, short cOffset, short cLen, byte targetFieldType, byte[] targetInput, short targetOffset, short targetLen, byte targetProfileFieldSearch, byte[] output, short outOffset, byte authMethod);	
+	public short getUserInfo(byte credFieldType, byte[] credInput, short cOffset, short cLen, byte targetFieldType, byte[] targetInput, short targetOffset, short targetLen, byte targetProfileFieldSearch, byte[] output, short outOffset, byte authMethod);	
 	
-    public boolean importLocalGlobalUserCredToAOC(byte credFieldType, byte[] credInput, short cOffset, short cLen, byte[] input, short offset, short len, byte[] output, short outOffset, byte authMethod);	
+	public boolean importLocalGlobalUserCredToAOC(byte credFieldType, byte[] credInput, short cOffset, short cLen, byte[] input, short offset, short len, byte[] output, short outOffset, byte authMethod);	
 	
-    public boolean promoteAOCUserCred(byte credFieldType, byte[] credInput, short cOffset, short cLen, byte fieldType, byte[] input, short offset, short len, byte[] output, short outOffset, byte authMethod);	
+	public boolean promoteAOCUserCred(byte credFieldType, byte[] credInput, short cOffset, short cLen, byte fieldType, byte[] input, short offset, short len, byte[] output, short outOffset, byte authMethod);	
 	
-    public boolean deleteUserCred(byte credFieldType, byte[] credInput, short cOffset, short cLen, byte fieldType, byte[] input, short offset, short len, byte[] output, short outOffset, byte authMethod);
-								  
-    public boolean newObject(byte objectType, byte[] objectName, short nameOffset, short nameLen, byte[] objectMat1, short om1Offset, short om1Len, byte[] objectMat2, short om2Offset, short om2Len, byte export, byte acl, byte extendedObjectClass, byte extendedObjectType, boolean requireAttestation, byte[] expiryTS, short expiryOffset, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte[] output, short outOffset, byte authMethod);	
+	public boolean deleteUserCred(byte credFieldType, byte[] credInput, short cOffset, short cLen, byte fieldType, byte[] input, short offset, short len, byte[] output, short outOffset, byte authMethod);
 	
-    public short manageObject(byte[] objectName, short nameOffset, short nameLen, byte objectFieldType, byte[] input, short offset, short len, byte[] output, short outOffset, boolean isSecret, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte authMethod);
+	public boolean newObject(byte objectType, byte[] objectName, short nameOffset, short nameLen, byte[] objectMat1, short om1Offset, short om1Len, byte[] objectMat2, short om2Offset, short om2Len, byte export, byte acl, byte extendedObjectClass, byte extendedObjectType, boolean requireAttestation, byte[] expiryTS, short expiryOffset, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte[] output, short outOffset, byte authMethod);	
 	
-    public short listObjects(byte[] output, short outOffset, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte authMethod);				
+	public short manageObject(byte[] objectName, short nameOffset, short nameLen, byte objectFieldType, byte[] input, short offset, short len, byte[] output, short outOffset, boolean isSecret, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte authMethod);
 	
-    public short getObjectInfo(byte[] input, short offset, short len, byte field, byte[] output, short outOffset, byte credFieldType, byte[] credInput, short credOffset, short credLen, byte authMethod);
+	public short listObjects(byte[] output, short outOffset, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte authMethod);				
 	
-    public short getObjectMaterial(byte[] input, short offset, short len, boolean isPublic, byte[] output, short outOffset, byte credFieldType, byte[] credInput, short credOffset, short credLen, byte authMethod);
+	public short getObjectInfo(byte[] input, short offset, short len, byte field, byte[] output, short outOffset, byte credFieldType, byte[] credInput, short credOffset, short credLen, byte authMethod);
 	
-    public short executeObject(byte execMethod, byte subOpMode1, byte subOpMode2, boolean useBufferedData, byte[] objectName, short nameOffset, short nameLen, byte[] input, short offset, short len, byte[] output, short outOffset, byte credFieldType, byte[] credInput, short credOffset, short credLen, byte authMethod);
+	public short getObjectMaterial(byte[] input, short offset, short len, boolean isPublic, byte[] output, short outOffset, byte credFieldType, byte[] credInput, short credOffset, short credLen, byte authMethod);
 	
-    public boolean deleteObject(byte[] input, short offset, short len, byte[] output, short outOffset, byte credFieldType, byte[] credInput, short credOffset, short credLen, byte authMethod);		
+	public short executeObject(byte execMethod, byte subOpMode1, byte subOpMode2, boolean useBufferedData, byte[] objectName, short nameOffset, short nameLen, byte[] input, short offset, short len, byte[] output, short outOffset, byte credFieldType, byte[] credInput, short credOffset, short credLen, byte authMethod);
 	
-    public short extendedRequest(byte[] input, short offset, short len, byte[] output, short outOffset);	
+	public boolean deleteObject(byte[] input, short offset, short len, byte[] output, short outOffset, byte credFieldType, byte[] credInput, short credOffset, short credLen, byte authMethod);		
 	
-    public short importExportObject(boolean isCredential, byte action, byte subAction, byte[] input, short offset, short len, byte[] secInput, short secOffset, short secLen, byte[] sec1Input, short sec1Offset, short sec1Len, byte[] output, short outOffset, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte authMethod);	
+	public short extendedRequest(byte[] input, short offset, short len, byte[] output, short outOffset);	
 	
-    public short cryptoChaCha20(byte[] key, short keyOffset, byte[] nonce, short nonceOffset, byte[] counter, short ctrOffset, byte[] input, short inOffset, short length, byte[] output, short outOffset);	
+	public short importExportObject(boolean isCredential, byte action, byte subAction, byte[] input, short offset, short len, byte[] secInput, short secOffset, short secLen, byte[] sec1Input, short sec1Offset, short sec1Len, byte[] output, short outOffset, byte credFieldType, byte[] credInput, short cOffset, short cLen, byte authMethod);	
 	
-    public short cryptoHMAC(byte hashType, byte[] key, short keyOffset, short keyLength, byte[] msg, short mOff, short mLen, byte[] ipad, short offIPad, byte[] opad, short offOPad, byte[] secB, short offSecB, byte[] oMsg, short outOff);	
+	public short cryptoChaCha20(byte[] key, short keyOffset, byte[] nonce, short nonceOffset, byte[] counter, short ctrOffset, byte[] input, short inOffset, short length, byte[] output, short outOffset);
+		
+	public short cryptoHMAC(byte hashType, byte[] key, short keyOffset, short keyLength, byte[] msg, short mOff, short mLen, byte[] ipad, short offIPad, byte[] opad, short offOPad, byte[] secB, short offSecB, byte[] oMsg, short outOff);
+		
+	public short uiSession(byte uiType, byte uiSubMode, byte uiSubMode1, byte uiSubMode2, byte uiSubMode3, byte[] title, short titleOffset, short titleLen, byte[] input, short inOffset, short inLen, byte[] output, short outOffset);
+		
+	public boolean getTime(byte[] output, short offset);
+		
+	public boolean isSessionBusy();	
 	
-    public short uiSession(byte uiType, byte uiSubMode, byte uiSubMode1, byte uiSubMode2, byte uiSubMode3, byte[] title, short titleOffset, short titleLen, byte[] input, short inOffset, short inLen, byte[] output, short outOffset);	
+	public void resetSession();
 	
-    public boolean getTime(byte[] output, short offset);	
+	public short bufferData(boolean isWrite, short newMaxLen, byte[] input, short offset, short len, short buffStartOff, byte[] output, short outOffset);
 	
-    public boolean isSessionBusy();	
+	public short getBufferDataLength();	
 	
-    public void resetSession();	
+	public short clearBuffer(byte[] output, short outOffset);
 	
-    public short bufferData(boolean isWrite, short newMaxLen, byte[] input, short offset, short len, short buffStartOff, byte[] output, short outOffset);	
-	
-    public short getBufferDataLength();	
-	
-    public short clearBuffer(byte[] output, short outOffset);	
-	
-    public short hexStrToBin(byte[] input, short offset, byte[] output, short outOffset, short len);
+	public short hexStrToBin(byte[] input, short offset, byte[] output, short outOffset, short len);
 }
