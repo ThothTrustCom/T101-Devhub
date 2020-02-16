@@ -61,7 +61,7 @@ JavaCard applets that are not registered to the Key Manager will only be able to
 * `isSessionBusy`
 * `hexStrToBin`
 
-![THETAKey T101 JavaCard Architecture](file:/img/JC-Arch.png)
+![THETAKey T101 JavaCard Architecture](/img/JC-Arch.png)
 
 
 ## T101's KeyManager and OpenAPI Components Architecture ##
@@ -87,4 +87,4 @@ All Global Users have an internal attestation Identity Certificate generated dur
 
 One possible use case might involve a national level Registration Authority creating a properly attested user identity that is injected into a THETAKey T101 card which can the global user (card holder), may have other applets that wish to access the card holder's attested identity for financial or Governmental use cases.
 
-![KM101 Architecture](file:/img/KM-Arch.png)
+![KM101 Architecture](/img/KM-Arch.png)
