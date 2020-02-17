@@ -35,6 +35,10 @@ variants that the THETAKey devices that are available.
 * RTC clock residing in Controller MCU
 * Re-chargeable internal battery using ISO-7816 contact pad for re-charging
   * Uses conventional smart card readers with 5 volts to re-charge smart card battery over contact pad.
+  
+## The THD-89 Common Criteria Secure MicroController Certification ##
+* Note that the certification does not apply to the JCOS or other applets and libraries not specified in the Common Criteria document.
+* [https://www.commoncriteriaportal.org/files/epfiles/2017-28%20INF-2492.pdf](https://www.commoncriteriaportal.org/files/epfiles/2017-28%20INF-2492.pdf)
 
 ## THETAKey Subsystems ##
 
