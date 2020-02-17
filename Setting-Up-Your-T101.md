@@ -14,8 +14,27 @@
 After you have received your shipment, you should perform the following checks.
 
 * The two pieces of tamper evident stickers that have been used to seal the box must be intact without revealing signs of attempted tamper on them. The tamper evident sticker will have visible 'VOID' words across the box when there is an attempt to peel or break the tamper evident sticker.
+
+	![Tampered Sticker](/img/Tampered-Box.jpg)
+
 * The boxes must not have sign of forced entry.
-* Power-on the card by holding onto the Power button firmly for 5 seconds until the card boots up and scroll to the `Info` option on the main screen. The card information page will be displayed on the E-Ink screen showing the firmware version, hardware version, the Key Manager Identity value as well as the current card status via the `Stat` value. The `Stat` value must show a `Factory` state to indicate that the Key Manager environment have not seen usage.
+* Power-on the card by holding onto the Power button firmly for 5 seconds until the card boots up and scroll to the `Info` option on the main screen. 
+
+	![Main Menu - Selecting Info page](/img/FP-Select-Info.jpg)
+
+* The card information page will be displayed on the E-Ink screen showing the firmware version, hardware version, the Key Manager Identity value on the first page.
+	
+	![Card Info - Page 1](/img/FP-Page-1.jpg)
+
+* Press the downwards arrow button to view the current card status via the `Stat` value. The `Stat` value must show a `Factory` state to indicate that the Key Manager environment have not seen usage.
+
+	![Card Info - Page 2](/img/FP-Page-2.jpg)
+
+* If the `Stat` value is in `Active` mode, there have been attempts creating a Global User Container or an Applet Object Container with possible intention to gain access to the lower layer device drivers or to investigate the Key Manager. A new card should always be in the `Factory` mode.
+
+	![Card Info - Not Factory Mode](/img/FP-Not-Factory.jpg)
+
+* Watch the Youtube video on bootig up the card [here](https://youtu.be/7lEOVMvJF7I).
 
 
 ## Setting Up Card's Time Key ##
