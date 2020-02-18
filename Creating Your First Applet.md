@@ -33,7 +33,7 @@
 	
 	a. ![Create KM101 Package](/img/New-KM101-Package.jpg)
 
-	b. ![Copy T101OpenAPI Shareable Interface](/img/Copy-Shareable.jpg.jpg)
+	b. ![Copy T101OpenAPI Shareable Interface](/img/Copy-Shareable.jpg)
 
 4. Begin importing the `T101OpenAPI` into your applet source code
 
