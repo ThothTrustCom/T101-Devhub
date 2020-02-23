@@ -25,9 +25,27 @@ The native access to the keypad and screen are forbidden and in their place, a u
 
 ## UI Window ##
 
+The image below shows the different major components of a UI Window.
 
+![UI Window Components](/img/UI-Window-Components.png)
 
+* Security Session Indicator - Uses a single character to represent the origin of the Window rendering call. An Indicator set to `0` indicates that the Session's Windowing call originates from the KeyManager itself. The KeyManager has the highest trust level in the UI Security Model. The first registered AOC client applet will be assigned `1`, the second applet will be `2` and subsequently numberd in an increasing order with a maximum of `9` thus there will only be a maximum space of 9 applets that can be registered if enabled to the maximum number.
 
+	A special applet for managing Global users will be assigned `F` which `A` to `F` are reserved for special use applets.
+
+* Title - A non-symbolic printable ASCII character set with a maximum of 9 characters to be used as the current window's title.
+
+* Secure Session Logo - The Secure Session Logo is a special logo that indicates that the windowing call's session will return an output that will be processed in a highly trusted environment (KeyManager). Windowing calls that return possibly sesnitive inputs back to the originating client applets instead of the KeyManager for processing of inputs will not be considered a Secure Session. A Secure Session requires the processing (i.e. PIN/Password entry) to be handled by the KeyManager and actions (i.e. PIN/Password checking) to be directly handled by the KeyManager instead of passing the output back to the calling applet for processing.
+
+	The reason is that the calling applet maybe malicious (i.e. spoofing a Windowing call) that may attempt to steal card holder credentials.
+
+	Card developers may want their users to ignore the Secure Session logo if they have reason to believe that their applets are trusted and have been hardened sufficiently against credential leakages.
+
+* Battery - Battery logo indicates its current power status. A battery logo with a lightning symbol would indicate a T101 card that is currently charging via the contact chip.
+
+* Content Pane - Content Pane is the area whereby windowing contents are displayed. Contents maybe filtered or structured according to the type of windowing calls being utilized.
+
+* Control Pane is a status bar where additional UI controlling mechanisms may be displayed. Some UI controlling mechanisms can have interactive purposes (i.e. virtual keypad's mode changing and editing controls). Content within the Control Pane is directly controlled by the KeyManager and displayed according to the caller's Windowing type.
 
 ## Basic Keypad Controls ##
 
