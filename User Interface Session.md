@@ -71,19 +71,19 @@ The image below shows the different major components of a UI Window.
 
 	* PIN mode
 
-	![PIN and Numerical entry mode](/img/UI-Text-PIN.png)
+		![PIN and Numerical entry mode](/img/UI-Text-PIN.png)
 
 	* Alphabet mode. For capital alphabets, the Control Pane would display `ABC` and for small letters, `abc` would be displayed on the Control Pane instead.
 
-	![UI Window for ASCII alphabets](/img/UI-Text-Alpha-Capital.png)
+		![UI Window for ASCII alphabets](/img/UI-Text-Alpha-Capital.png)
 
 	* Hexadecimal mode. Allows the entry of ASCII-fied hexadecimal input. The Hexadecimal input mode would have a `HIR` (Hex Input Error) status in the Control Pane if there is invalid hexadecimal inputs being chosen.
 
-	![UI Window for Hexadecimal input](/img/UI-Text-Hex.png)
+		![UI Window for Hexadecimal input](/img/UI-Text-Hex.png)
 
 	* ASCII Symbols mode. Allows the entry of printable ASCII symbols.
 
-	![UI Window for ASCII printable symbols](/img/UI-Text-Symbol.png)
+		![UI Window for ASCII printable symbols](/img/UI-Text-Symbol.png)
 
 	* Preview mode. Preview mode can be entered from any keypad types when the `C` touch button is activated. The Control Pane region will reflect either a `TOP`, `REA` or `BOT` status. The `TOP` status indicates that the currently viewed text is at the topmost of the content and there are more data available for viewing. 
 
@@ -91,8 +91,15 @@ The image below shows the different major components of a UI Window.
 
 		The `REA` status indicates that the currently viewed text is in the middle of the content and the user could choose to scroll up or down the text content.
 
-	![UI Window for input preview](/img/UI-Text-Preview.png)
+		![UI Window for input preview](/img/UI-Text-Preview.png)
 
+## Keypad Input Mode Changing Flow
+
+Keypad input mode switching utilizes a deterministic workflow as shown in the chart below.
+
+Each mode has its own switching path with exception of the Hexadecimal input mode which cannot switch into other mode and can only be called explicitly.
+
+![UI Window mode switching flow](/img/Keypad-Mode-Switching.jpg)
 
 ## Types of Windowing Sessions ##
 
