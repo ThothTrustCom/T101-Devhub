@@ -49,8 +49,49 @@ The image below shows the different major components of a UI Window.
 
 ## Basic Keypad Controls ##
 
+* UI_TYPE_TEXT screen control. A basic text display window that accepts either an OK or Cancel button touch via the `OK` or `C` buttons.
 
+	If the Control Pane area displays a `[1\2]` or `[2\2]`, user may use the upwards and downwards button for scrolling between pages of the text windowing screen.
 
+![UI Window for Text](/img/UI-Text.png)
+
+* UI_TYPE_QR screen control. Displays a single QR code that accepts either an OK or Cancel button touch via the `OK` or `C` buttons. Page scrolling is not possible.
+
+![UI Window for QR code](/img/UI-QR.png)
+
+* UI_TYPE_LIST screen control. Displays a list of options for single item selection. User may use the upwards and downwards button for scrolling between items and for selecting an option, touch the `OK` button. For cancelling the session, touch the `C` (Cancel) button.
+
+![UI Window for QR code](/img/UI-List.png)
+
+* UI_TYPE_INPUT screen control. Displays a text input window. The upwards button jumps the keypad selection cursor between keypad 'segments' to allow faster typing. The downwards button moves the cursor incrementally instead for more precise keypad selection. 
+
+	The `OK` button is to select the cursor's virtual keypad input option while the `C` (Cancel) is used to enter and exit 'Preview' mode. Preview mode allows one to screen through all the entered data using the upwards and downwards button but no data can be entered while in 'Preview' mode. 
+
+	Exiting the 'Preview' mode requires pressing the `C` button again.
+
+	* PIN mode
+
+	![PIN and Numerical entry mode](/img/UI-Text-PIN.png)
+
+	* Alphabet mode. For capital alphabets, the Control Pane would display `ABC` and for small letters, `abc` would be displayed on the Control Pane instead.
+
+	![UI Window for ASCII alphabets](/img/UI-Text-Alpha-Capital.png)
+
+	* Hexadecimal mode. Allows the entry of ASCII-fied hexadecimal input. The Hexadecimal input mode would have a `HIR` (Hex Input Error) status in the Control Pane if there is invalid hexadecimal inputs being chosen.
+
+	![UI Window for Hexadecimal input](/img/UI-Text-Hex.png)
+
+	* ASCII Symbols mode. Allows the entry of printable ASCII symbols.
+
+	![UI Window for ASCII printable symbols](/img/UI-Text-Symbol.png)
+
+	* Preview mode. Preview mode can be entered from any keypad types when the `C` touch button is activated. The Control Pane region will reflect either a `TOP`, `REA` or `BOT` status. The `TOP` status indicates that the currently viewed text is at the topmost of the content and there are more data available for viewing. 
+
+		The `BOT`  status indicates that the currently viewed text is at the bottommost of the text with no more content available for viewing.
+
+		The `REA` status indicates that the currently viewed text is in the middle of the content and the user could choose to scroll up or down the text content.
+
+	![UI Window for input preview](/img/UI-Text-Preview.png)
 
 
 ## Types of Windowing Sessions ##
@@ -67,11 +108,11 @@ There are 5 types of UISession modes as listed below.
 
 	The UI_TYPE_INPUT windowing mode allows the use of 5 types of keypad modes namely:
 	
-	* KEYPAD_PIN_MODE - PIN entry or numerical digit entry
-	* KEYPAD_ALPHA_MODE - Alphabet (captial letters) entry
-	* KEYPAD_ALPHA_SMALL_MODE - Alphabet (small letters) entry
-	* KEYPAD_HEX_MODE - Hexadecimal mode entry
-	* KEYPAD_SYM_MODE - Printable ASCII characters entry
+	* KEYPAD_PIN_MODE (`0x01`) - PIN entry or numerical digit entry
+	* KEYPAD_ALPHA_MODE (`0x02`) - Alphabet (captial letters) entry
+	* KEYPAD_ALPHA_SMALL_MODE (`0x03`) - Alphabet (small letters) entry
+	* KEYPAD_HEX_MODE (`0x04`) - Hexadecimal mode entry
+	* KEYPAD_SYM_MODE (`0x05`) - Printable ASCII characters entry
 
 	The UI_TYPE_INPUT windowing mode has a workflow that follows the progression of selection of the types of keypad modes.
 
