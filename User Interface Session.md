@@ -53,15 +53,15 @@ The image below shows the different major components of a UI Window.
 
 	If the Control Pane area displays a `[1\2]` or `[2\2]`, user may use the upwards and downwards button for scrolling between pages of the text windowing screen.
 
-![UI Window for Text](/img/UI-Text.png)
+	![UI Window for Text](/img/UI-Text.png)
 
 * UI_TYPE_QR screen control. Displays a single QR code that accepts either an OK or Cancel button touch via the `OK` or `C` buttons. Page scrolling is not possible.
 
-![UI Window for QR code](/img/UI-QR.png)
+	![UI Window for QR code](/img/UI-QR.png)
 
 * UI_TYPE_LIST screen control. Displays a list of options for single item selection. User may use the upwards and downwards button for scrolling between items and for selecting an option, touch the `OK` button. For cancelling the session, touch the `C` (Cancel) button.
 
-![UI Window for QR code](/img/UI-List.png)
+	![UI Window forList](/img/UI-List.png)
 
 * UI_TYPE_INPUT screen control. Displays a text input window. The upwards button jumps the keypad selection cursor between keypad 'segments' to allow faster typing. The downwards button moves the cursor incrementally instead for more precise keypad selection. 
 
