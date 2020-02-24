@@ -49,6 +49,12 @@ The image below shows the different major components of a UI Window.
 
 ## Basic Keypad Controls ##
 
+The basic virtual keypad layout:
+
+![UI Window Keypad layout](/img/Basic-Keyboard-Layout.png)
+
+Below is a list of UI Windowing types:
+
 * UI_TYPE_TEXT screen control. A basic text display window that accepts either an OK or Cancel button touch via the `OK` or `C` buttons.
 
 	If the Control Pane area displays a `[1\2]` or `[2\2]`, user may use the upwards and downwards button for scrolling between pages of the text windowing screen.
@@ -84,6 +90,8 @@ The image below shows the different major components of a UI Window.
 	* ASCII Symbols mode. Allows the entry of printable ASCII symbols.
 
 		![UI Window for ASCII printable symbols](/img/UI-Text-Symbol.png)
+
+		Note: The Symbol virtual keypad does not have the 'Mode Change', 'Backspace' and 'Cancel' virtual keys as it relies on other virtual keypad types to allow backspacing inputselecting 'Cancel' options and changing modes.
 
 	* Preview mode. Preview mode can be entered from any keypad types when the `C` touch button is activated. The Control Pane region will reflect either a `TOP`, `REA` or `BOT` status. The `TOP` status indicates that the currently viewed text is at the topmost of the content and there are more data available for viewing. 
 
