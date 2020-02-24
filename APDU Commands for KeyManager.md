@@ -438,7 +438,7 @@ Return: Set new Time Key. Can only be done if the device is in 'Factory' mode.
 	<td>Timestamp (UNIX)</td>
 	</tr>
 	<tr>
-	<td>3 bytes. Use bytes `1010001` </td>
+	<td>3 bytes. Use bytes `010001` </td>
 	<td>8 bytes.</td>
 	<td>4 bytes.</td>
 	</tr>
@@ -458,7 +458,7 @@ Return: Set new Time Key. Can only be done if the device is in 'Factory' mode.
 	<td>MAC</td>
 	</tr>
 	<tr>
-	<td>3 bytes. Use bytes `1010001` </td>
+	<td>3 bytes. Use bytes `010001` </td>
 	<td>8 bytes.</td>
 	<td>4 bytes.</td>
 	<td>32 bytes.</td>
