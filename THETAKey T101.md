@@ -1,5 +1,7 @@
 # ThothTrust THETAKey T101 #
 
+![THETAKey T101](/img/T101-Card.png)
+
 ## About THETAKey ##
 
 The THETAKey smart card is a rechargeable and highly advanced JavaCard capable smart card with an embedded e-Ink display screen with a 
@@ -92,3 +94,7 @@ All Global Users have an internal attestation Identity Certificate generated dur
 One possible use case might involve a national level Registration Authority creating a properly attested user identity that is injected into a THETAKey T101 card which can the global user (card holder), may have other applets that wish to access the card holder's attested identity for financial or Governmental use cases.
 
 ![KM101 Architecture](/img/KM-Arch.png)
+
+## THETAKey Product Page ##
+* [https://thothtrust.com/products.html#thetakey](https://thothtrust.com/products.html#thetakey)
+* Email for a sample [mailto:sales@thothtrust.com](here).
