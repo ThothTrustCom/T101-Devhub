@@ -492,7 +492,30 @@ Return: Set new Time Key. Can only be done if the device is in 'Factory' mode.
 
 	Return: It should return `9000` to indicate successful setting of new RTC time. If it returns `6984`, either the length or format is invalid (which may include incorrect header) or the signature is signed incorrectly (i.e. using wrong Time Key or bad formatting). You should query the device RTC time to confirm that the new time has been set correctly.
 
+### Cleanup Global/Applet Object Containers ###
 
+<table border="1">
+<tr>
+<td>CLA</td>
+<td>INS</td>
+<td>P1</td>
+<td>P2</td>
+<td>LC</td>
+<td>DATA</td>
+<td>LE</td>
+</tr>
+<tr>
+<td>B0</td>
+<td>FF</td>
+<td>0F</td>
+<td>FF for Global Users, otherwise default to AOC Containers</td>
+<td>00</td>
+<td>N/A</td>
+<td>00</td>
+</tr>
+</table>
 
+Description: If the command is used with P2 set to `FF` for Global Users, any Global Object Containers with its Global User credential either already expired or the PIN/Password retry have exceed the maximum retry threshold would automatically be destroyed to free Global Object Container slots. Destruction includes the destroying of the particular Global Object Container meeting the above criterias (including the data objects in the Global Object Container) and deleting all membership of the particular Global User from all existing AOC Conrainer. If the command is used with any byte on P2 except `FF`, the cleanup would be targetted on all AOC containers that have their registered JavaCard applet not accessible by the JavaCard Virtual Machine (due to the applet already deleted from the card but failure to cleanly delete the corresponding AOC container).
 
+Return: `9000` should always be returned.
 
