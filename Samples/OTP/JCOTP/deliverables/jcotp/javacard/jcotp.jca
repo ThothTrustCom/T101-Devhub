@@ -1,0 +1,2151 @@
+// converted by version  [v3.0.4]
+// on Thu Feb 27 19:38:56 SGT 2020
+
+.package jcotp {
+	.aid 0x4A:0x43:0x4F:0x54:0x50;
+	.version 1.0;
+
+	.imports {
+		0xA0:0x0:0x0:0x0:0x62:0x0:0x1 1.0;		//java/lang
+		0xA0:0x0:0x0:0x0:0x62:0x1:0x2 1.5;		//javacard/security
+		0xA0:0x0:0x0:0x0:0x62:0x1:0x1 1.5;		//javacard/framework
+		0x4B:0x4D:0x31:0x30:0x31 1.0;		//KM101
+	}
+
+	.applet {
+		0x4A:0x43:0x4F:0x54:0x50:0xFF JCOTP;
+	}
+
+	.constantPool {
+		// 0
+		instanceFieldRef 3.1 JCOTP/api;
+		// 1
+		instanceFieldRef short[] JCOTP/sb;
+		// 2
+		instanceFieldRef byte[] JCOTP/TEXT_SETUP_COMPLETE;
+		// 3
+		instanceFieldRef byte[] JCOTP/TEXT_FAILED;
+		// 4
+		instanceFieldRef byte[] JCOTP/TEXT_OTP;
+		// 5
+		instanceFieldRef byte[] JCOTP/otpKey;
+		// 6
+		instanceFieldRef byte[] JCOTP/aocPin;
+		// 7
+		instanceFieldRef byte[] JCOTP/appName;
+		// 8
+		instanceFieldRef byte[] JCOTP/admName;
+		// 9
+		instanceFieldRef byte[] JCOTP/admPin;
+		// 10
+		instanceFieldRef byte[] JCOTP/expTime;
+		// 11
+		instanceFieldRef byte[] JCOTP/otpCtr;
+		// 12
+		instanceFieldRef 1.11 JCOTP/hash;
+		// 13
+		instanceFieldRef 2.6 JCOTP/apiAID;
+		// 14
+		staticMethodRef Codec/intToBytes([BSI)V;
+		// 15
+		staticMethodRef Codec/toDecimalASCII([BSS[BS)S;
+		// 16
+		.classRef JCOTP;
+		// 17
+		staticMethodRef JCOTP/<init>()V;
+		// 18
+		staticMethodRef 2.3.0()V;		// javacard/framework/Applet.<init>()V
+		// 19
+		staticMethodRef 0.0.0()V;		// java/lang/Object.<init>()V
+		// 20
+		staticMethodRef 2.8.15(SB)[S;		// javacard/framework/JCSystem.makeTransientShortArray(SB)[S
+		// 21
+		staticFieldRef byte[] Codec/BCD_SIZE_PER_BYTES;
+		// 22
+		virtualMethodRef 1.11.2()B;		// getAlgorithm()B
+		// 23
+		staticFieldRef short HMACSHA/outSize;
+		// 24
+		staticFieldRef short HMACSHA/blockSize;
+		// 25
+		staticMethodRef 2.16.3([BSSB)S;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+		// 26
+		virtualMethodRef 1.11.4()V;		// reset()V
+		// 27
+		virtualMethodRef 1.11.1([BSS[BS)S;		// doFinal([BSS[BS)S
+		// 28
+		staticMethodRef 2.16.2([BS[BSS)S;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+		// 29
+		virtualMethodRef 1.11.5([BSS)V;		// update([BSS)V
+		// 30
+		staticFieldRef short HMACSHA/HMAC_SHA256_BLOCK_SIZE;
+		// 31
+		staticMethodRef 2.8.13(SB)[B;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+		// 32
+		staticFieldRef short HMACSHA/HMAC_SHA384_BLOCK_SIZE;
+		// 33
+		staticFieldRef byte[] JCOTP/b0;
+		// 34
+		staticMethodRef 1.11.0(BZ)Ljavacard/security/MessageDigest;;		// javacard/security/MessageDigest.getInstance(BZ)Ljavacard/security/MessageDigest;
+			.descriptor	Ljavacard/security/MessageDigest;	1.11;
+
+		// 35
+		staticFieldRef short HMACSHA/HMAC_SHA512_BLOCK_SIZE;
+		// 36
+		virtualMethodRef 2.3.1()V;		// register()V
+		// 37
+		virtualMethodRef JCOTP/destroyEnv()Z;
+		// 38
+		.classRef 0.2;		// java/lang/Exception
+		// 39
+		virtualMethodRef 2.3.3()Z;		// selectingApplet()Z
+		// 40
+		virtualMethodRef 2.10.1()[B;		// getBuffer()[B
+		// 41
+		staticFieldRef byte[] JCOTP/serverAID;
+		// 42
+		staticMethodRef 2.8.11([BSB)Ljavacard/framework/AID;;		// javacard/framework/JCSystem.lookupAID([BSB)Ljavacard/framework/AID;
+			.descriptor	Ljavacard/framework/AID;	2.6;
+
+		// 43
+		staticMethodRef HMACSHA/process(Ljavacard/security/MessageDigest;[BSS[BSS[BS[BS[BS[BS)S;
+			.descriptor	Ljavacard/security/MessageDigest;	1.11;
+
+		// 44
+		staticMethodRef 2.7.1(S)V;		// javacard/framework/ISOException.throwIt(S)V
+		// 45
+		staticMethodRef 2.8.4(Ljavacard/framework/AID;B)Ljavacard/framework/Shareable;;		// javacard/framework/JCSystem.getAppletShareableInterfaceObject(Ljavacard/framework/AID;B)Ljavacard/framework/Shareable;
+			.descriptor	Ljavacard/framework/AID;	2.6;
+			.descriptor	Ljavacard/framework/Shareable;	2.2;
+
+		// 46
+		.classRef 3.1;		// KM101/T101OpenAPI
+		// 47
+		virtualMethodRef JCOTP/initEnv([BSS[BSS[BSS[BSS[BSS[B)V;
+		// 48
+		virtualMethodRef 2.10.6()S;		// setIncomingAndReceive()S
+		// 49
+		staticMethodRef UtilBase32/base32toByteArray([BSS[BSB)S;
+		// 50
+		staticMethodRef HOTPEngine/generateOTP(Ljavacard/security/MessageDigest;[BSS[BSS[BS[BS)S;
+			.descriptor	Ljavacard/security/MessageDigest;	1.11;
+
+		// 51
+		virtualMethodRef JCOTP/uxRender(BBBBB[BSS[BSS[BSS[BS[B)S;
+		// 52
+		virtualMethodRef 2.10.7()S;		// setOutgoing()S
+		// 53
+		virtualMethodRef 2.10.9(S)V;		// setOutgoingLength(S)V
+		// 54
+		virtualMethodRef 2.10.5([BSS)V;		// sendBytesLong([BSS)V
+		// 55
+		virtualMethodRef 2.10.4(SS)V;		// sendBytes(SS)V
+		// 56
+		staticMethodRef 2.16.5(BB)S;		// javacard/framework/Util.makeShort(BB)S
+		// 57
+		virtualMethodRef JCOTP/enrollNewAdminUsers([BSS[BSS[BS[BSS[B)Z;
+		// 58
+		virtualMethodRef JCOTP/finalizeContainer([BSS[B)Z;
+		// 59
+		virtualMethodRef JCOTP/authContainer([BSS[BS[B)S;
+		// 60
+		staticMethodRef UtilBase32/base32toByte(B)B;
+		// 61
+		staticMethodRef UtilBase32/shiftByte(BS)B;
+	}
+
+	.class public Codec 0 extends 0.0 {		// extends java/lang/Object
+
+		.fields {
+			public static final byte[] BCD_SIZE_PER_BYTES 0 = {0,3,5,8,10,13,15,17,20,22,25,27,29,32,34,37,39,41,44,46,49,51,53,56,58,61,63,66,68,70,73,75,78};		// [B
+		}
+
+		.publicMethodTable 1 {
+			equals(Ljava/lang/Object;)Z;
+		}
+
+		.packageMethodTable 0 {
+		}
+
+		.method public <init>()V 0 {
+			.stack 1;
+			.locals 0;
+
+				L0:	aload_0;
+					invokespecial 19;		// java/lang/Object.<init>()V
+					return;
+		}
+
+		.method public static toDecimalASCII([BSS[BS)S 1 {
+			.stack 4;
+			.locals 6;
+
+				L0:	getstatic_a 21;		// reference jcotp/Codec.BCD_SIZE_PER_BYTES
+					sload_2;
+					baload;
+					sstore 5;
+				L1:	sconst_0;
+					sstore 9;
+				L2:	goto L11;
+				L3:	sconst_0;
+					sstore 8;
+				L4:	sconst_0;
+					sstore 10;
+				L5:	goto L9;
+				L6:	aload_0;
+					sload_1;
+					sload 10;
+					sadd;
+					baload;
+					sspush 255;
+					sand;
+					sstore 6;
+				L7:	sload 8;
+					sspush 256;
+					smul;
+					sload 6;
+					sadd;
+					sstore 7;
+				L8:	sload 7;
+					bspush 10;
+					srem;
+					sstore 8;
+					aload_0;
+					sload_1;
+					sload 10;
+					sadd;
+					sload 7;
+					bspush 10;
+					sdiv;
+					s2b;
+					bastore;
+					sinc 10 1;
+				L9:	sload 10;
+					sload_2;
+					if_scmplt L6;
+				L10:	aload_3;
+					sload 4;
+					sload 5;
+					sadd;
+					sload 9;
+					ssub;
+					sconst_1;
+					ssub;
+					sload 8;
+					bspush 48;
+					sadd;
+					s2b;
+					bastore;
+					sinc 9 1;
+				L11:	sload 9;
+					sload 5;
+					if_scmplt L3;
+				L12:	sload 5;
+					sreturn;
+		}
+
+		.method public static intToBytes([BSI)V 2 {
+			.stack 6;
+			.locals 0;
+
+				L0:	aload_0;
+					sload_1;
+					iload_2;
+					bipush 24;
+					ishr;
+					sipush 255;
+					iand;
+					i2b;
+					bastore;
+					aload_0;
+					sload_1;
+					sconst_1;
+					sadd;
+					iload_2;
+					bipush 16;
+					ishr;
+					sipush 255;
+					iand;
+					i2b;
+					bastore;
+					aload_0;
+					sload_1;
+					sconst_2;
+					sadd;
+					iload_2;
+					bipush 8;
+					ishr;
+					sipush 255;
+					iand;
+					i2b;
+					bastore;
+					aload_0;
+					sload_1;
+					sconst_3;
+					sadd;
+					iload_2;
+					sipush 255;
+					iand;
+					i2b;
+					bastore;
+					return;
+		}
+
+	}
+
+	.class public HMACSHA 1 extends 0.0 {		// extends java/lang/Object
+
+		.fields {
+			public static short HMAC_SHA256_OUT_SIZE 0 = 32;		// S
+			public static short HMAC_SHA384_OUT_SIZE 1 = 48;		// S
+			public static short HMAC_SHA512_OUT_SIZE 2 = 64;		// S
+			public static short HMAC_SHA256_BLOCK_SIZE 3 = 64;		// S
+			public static short HMAC_SHA384_BLOCK_SIZE 4 = 128;		// S
+			public static short HMAC_SHA512_BLOCK_SIZE 5 = 128;		// S
+			private static final byte IPAD = 54;		// B
+			private static final byte OPAD = 92;		// B
+			private static short outSize = 20;		// S
+			private static short blockSize = 64;		// S
+		}
+
+		.publicMethodTable 1 {
+			equals(Ljava/lang/Object;)Z;
+		}
+
+		.packageMethodTable 0 {
+		}
+
+		.method public <init>()V 0 {
+			.stack 1;
+			.locals 0;
+
+				L0:	aload_0;
+					invokespecial 19;		// java/lang/Object.<init>()V
+					return;
+		}
+
+		.method public static process(Ljavacard/security/MessageDigest;[BSS[BSS[BS[BS[BS[BS)S 1 {
+			.stack 6;
+			.locals 1;
+
+			.descriptor	Ljavacard/security/MessageDigest;	1.11;
+
+				L0:	aload_0;
+					invokevirtual 22;		// getAlgorithm()B
+					sconst_1;
+					if_scmpne L2;
+				L1:	bspush 20;
+					putstatic_s 23;		// short jcotp/HMACSHA.outSize
+					bspush 64;
+					putstatic_s 24;		// short jcotp/HMACSHA.blockSize
+					goto L9;
+				L2:	aload_0;
+					invokevirtual 22;		// getAlgorithm()B
+					sconst_4;
+					if_scmpne L4;
+				L3:	bspush 32;
+					putstatic_s 23;		// short jcotp/HMACSHA.outSize
+					bspush 64;
+					putstatic_s 24;		// short jcotp/HMACSHA.blockSize
+					goto L9;
+				L4:	aload_0;
+					invokevirtual 22;		// getAlgorithm()B
+					sconst_5;
+					if_scmpne L6;
+				L5:	bspush 48;
+					putstatic_s 23;		// short jcotp/HMACSHA.outSize
+					sspush 128;
+					putstatic_s 24;		// short jcotp/HMACSHA.blockSize
+					goto L9;
+				L6:	aload_0;
+					invokevirtual 22;		// getAlgorithm()B
+					bspush 6;
+					if_scmpne L8;
+				L7:	bspush 64;
+					putstatic_s 23;		// short jcotp/HMACSHA.outSize
+					sspush 128;
+					putstatic_s 24;		// short jcotp/HMACSHA.blockSize
+					goto L9;
+				L8:	sconst_m1;
+					sreturn;
+				L9:	aload 7;
+					sload 8;
+					getstatic_s 24;		// short jcotp/HMACSHA.blockSize
+					sconst_0;
+					invokestatic 25;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					aload 9;
+					sload 10;
+					getstatic_s 24;		// short jcotp/HMACSHA.blockSize
+					sconst_0;
+					invokestatic 25;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					aload 11;
+					sload 12;
+					getstatic_s 24;		// short jcotp/HMACSHA.blockSize
+					sconst_0;
+					invokestatic 25;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					sload_3;
+					getstatic_s 24;		// short jcotp/HMACSHA.blockSize
+					if_scmple L11;
+				L10:	aload_0;
+					invokevirtual 26;		// reset()V
+					aload_0;
+					aload_1;
+					sload_2;
+					sload_3;
+					aload 11;
+					sload 12;
+					invokevirtual 27;		// doFinal([BSS[BS)S
+					pop;
+					goto L12;
+				L11:	aload_1;
+					sload_2;
+					aload 11;
+					sload 12;
+					sload_3;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+				L12:	sconst_0;
+					sstore 15;
+				L13:	goto L15;
+				L14:	aload 7;
+					sload 15;
+					sload 8;
+					sadd;
+					aload 11;
+					sload 15;
+					sload 12;
+					sadd;
+					baload;
+					bspush 54;
+					sxor;
+					bastore;
+					aload 9;
+					sload 15;
+					sload 10;
+					sadd;
+					aload 11;
+					sload 15;
+					sload 12;
+					sadd;
+					baload;
+					bspush 92;
+					sxor;
+					bastore;
+					sinc 15 1;
+				L15:	sload 15;
+					getstatic_s 24;		// short jcotp/HMACSHA.blockSize
+					if_scmplt L14;
+				L16:	aload_0;
+					invokevirtual 26;		// reset()V
+					aload_0;
+					aload 7;
+					sload 8;
+					getstatic_s 24;		// short jcotp/HMACSHA.blockSize
+					invokevirtual 29;		// update([BSS)V
+					aload_0;
+					aload 4;
+					sload 5;
+					sload 6;
+					aload 13;
+					sload 14;
+					invokevirtual 27;		// doFinal([BSS[BS)S
+					pop;
+					aload_0;
+					invokevirtual 26;		// reset()V
+					aload_0;
+					aload 9;
+					sload 10;
+					getstatic_s 24;		// short jcotp/HMACSHA.blockSize
+					invokevirtual 29;		// update([BSS)V
+					aload_0;
+					aload 13;
+					sload 14;
+					getstatic_s 23;		// short jcotp/HMACSHA.outSize
+					aload 13;
+					sload 14;
+					invokevirtual 27;		// doFinal([BSS[BS)S
+					sreturn;
+		}
+
+		.method public static getBlockSize(B)S 2 {
+			.stack 1;
+			.locals 0;
+
+				L0:	sload_0;
+					stableswitch L4 4 6 L1 L2 L3;
+				L1:	getstatic_s 30;		// short jcotp/HMACSHA.HMAC_SHA256_BLOCK_SIZE
+					sreturn;
+				L2:	getstatic_s 32;		// short jcotp/HMACSHA.HMAC_SHA384_BLOCK_SIZE
+					sreturn;
+				L3:	getstatic_s 35;		// short jcotp/HMACSHA.HMAC_SHA512_BLOCK_SIZE
+					sreturn;
+				L4:	sconst_m1;
+					sreturn;
+		}
+
+	}
+
+	.class public HOTPEngine 2 extends 0.0 {		// extends java/lang/Object
+
+		.publicMethodTable 1 {
+			equals(Ljava/lang/Object;)Z;
+		}
+
+		.packageMethodTable 0 {
+		}
+
+		.method public <init>()V 0 {
+			.stack 1;
+			.locals 0;
+
+				L0:	aload_0;
+					invokespecial 19;		// java/lang/Object.<init>()V
+					return;
+		}
+
+		.method public static generateOTP(Ljavacard/security/MessageDigest;[BSS[BSS[BS[BS)S 1 {
+			.stack 16;
+			.locals 5;
+
+			.descriptor	Ljavacard/security/MessageDigest;	1.11;
+
+				L0:	sconst_0;
+					sstore 11;
+				L1:	iconst_0;
+					istore 12;
+				L2:	sconst_0;
+					sstore 14;
+				L3:	aload_0;
+					aload_1;
+					sload_2;
+					sload_3;
+					aload 4;
+					sload 5;
+					sload 6;
+					aload 7;
+					sload 8;
+					aload 7;
+					sload 8;
+					bspush 64;
+					sadd;
+					aload 7;
+					sload 8;
+					sspush 128;
+					sadd;
+					aload 7;
+					sload 8;
+					sspush 192;
+					sadd;
+					invokestatic 43;		// jcotp/HMACSHA.process(Ljavacard/security/MessageDigest;[BSS[BSS[BS[BS[BS[BS)S
+					sstore 11;
+					aload 7;
+					sload 8;
+					sspush 192;
+					sadd;
+					aload 7;
+					sload 8;
+					sload 11;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					aload 7;
+					sload 11;
+					sconst_1;
+					ssub;
+					sload 8;
+					sadd;
+					baload;
+					bspush 15;
+					sand;
+					sstore 15;
+				L4:	aload 7;
+					sload 15;
+					sload 8;
+					sadd;
+					baload;
+					s2i;
+					bipush 127;
+					iand;
+					bipush 24;
+					ishl;
+					aload 7;
+					sload 15;
+					sload 8;
+					sadd;
+					sconst_1;
+					sadd;
+					baload;
+					s2i;
+					sipush 255;
+					iand;
+					bipush 16;
+					ishl;
+					ior;
+					aload 7;
+					sload 15;
+					sload 8;
+					sadd;
+					sconst_2;
+					sadd;
+					baload;
+					s2i;
+					sipush 255;
+					iand;
+					bipush 8;
+					ishl;
+					ior;
+					aload 7;
+					sload 15;
+					sload 8;
+					sadd;
+					sconst_3;
+					sadd;
+					baload;
+					s2i;
+					sipush 255;
+					iand;
+					ior;
+					istore 12;
+					aload 7;
+					sload 8;
+					iload 12;
+					iipush 1000000;
+					irem;
+					invokestatic 14;		// jcotp/Codec.intToBytes([BSI)V
+					aload 7;
+					sload 8;
+					sconst_4;
+					aload 9;
+					sload 10;
+					invokestatic 15;		// jcotp/Codec.toDecimalASCII([BSS[BS)S
+					sstore 14;
+					sload 14;
+					sreturn;
+		}
+
+	}
+
+	.class public JCOTP 3 extends 2.3 {		// extends javacard/framework/Applet
+
+		.fields {
+			public 2.6 apiAID 0;		// Ljavacard/framework/AID;
+			public 3.1 api 1;		// LKM101/T101OpenAPI;
+			public short[] sb 2;		// [S
+			public byte[] TEXT_SETUP_COMPLETE 3;		// [B
+			public byte[] TEXT_FAILED 4;		// [B
+			private 1.11 hash 5;		// Ljavacard/security/MessageDigest;
+			private byte[] TEXT_OTP 6;		// [B
+			private byte[] otpCtr 7;		// [B
+			private byte[] otpKey 8;		// [B
+			private byte[] aocPin 9;		// [B
+			private byte[] appName 10;		// [B
+			private byte[] admName 11;		// [B
+			private byte[] admPin 12;		// [B
+			private byte[] expTime 13;		// [B
+			public static byte[] serverAID 0 = {75,77,49,48,49,0};		// [B
+			public static byte[] b0 1;		// [B
+		}
+
+		.publicMethodTable 7 {
+			equals(Ljava/lang/Object;)Z;
+			register()V;
+			register([BSB)V;
+			selectingApplet()Z;
+			deselect()V;
+			getShareableInterfaceObject(Ljavacard/framework/AID;B)Ljavacard/framework/Shareable;;
+			select()Z;
+			process(Ljavacard/framework/APDU;)V;
+			uninstall()V;
+			destroyEnv()Z;
+			initEnv([BSS[BSS[BSS[BSS[BSS[B)V;
+			authContainer([BSS[BS[B)S;
+			finalizeContainer([BSS[B)Z;
+			enrollNewAdminUsers([BSS[BSS[BS[BSS[B)Z;
+			uxRender(BBBBB[BSS[BSS[BSS[BS[B)S;
+		}
+
+		.packageMethodTable 0 {
+		}
+
+		.implementedInterfaceInfoTable { 
+			.interface 2.18 { 		// javacard/framework/AppletEvent
+				8;		// uninstall()V
+			}
+
+		}
+
+		.method public static install([BSB)V 0 {
+			.stack 1;
+			.locals 0;
+
+				L0:	new 16;		// jcotp/JCOTP
+					invokespecial 17;		// jcotp/JCOTP.<init>()V
+					return;
+		}
+
+		.method protected <init>()V 1 {
+			.stack 5;
+			.locals 0;
+
+				L0:	aload_0;
+					invokespecial 18;		// javacard/framework/Applet.<init>()V
+					aload_0;
+					aconst_null;
+					putfield_a 0;		// reference jcotp/JCOTP.api
+					aload_0;
+					sconst_3;
+					sconst_1;
+					invokestatic 20;		// javacard/framework/JCSystem.makeTransientShortArray(SB)[S
+					putfield_a 1;		// reference jcotp/JCOTP.sb
+					aload_0;
+					bspush 32;
+					newarray 11;
+					dup;
+					sconst_0;
+					bspush 32;
+					bastore;
+					dup;
+					sconst_1;
+					bspush 32;
+					bastore;
+					dup;
+					sconst_2;
+					bspush 32;
+					bastore;
+					dup;
+					sconst_3;
+					bspush 32;
+					bastore;
+					dup;
+					sconst_4;
+					bspush 32;
+					bastore;
+					dup;
+					sconst_5;
+					bspush 83;
+					bastore;
+					dup;
+					bspush 6;
+					bspush 101;
+					bastore;
+					dup;
+					bspush 7;
+					bspush 116;
+					bastore;
+					dup;
+					bspush 8;
+					bspush 117;
+					bastore;
+					dup;
+					bspush 9;
+					bspush 112;
+					bastore;
+					dup;
+					bspush 10;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 11;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 12;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 13;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 14;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 15;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 16;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 17;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 18;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 19;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 20;
+					bspush 67;
+					bastore;
+					dup;
+					bspush 21;
+					bspush 111;
+					bastore;
+					dup;
+					bspush 22;
+					bspush 109;
+					bastore;
+					dup;
+					bspush 23;
+					bspush 112;
+					bastore;
+					dup;
+					bspush 24;
+					bspush 108;
+					bastore;
+					dup;
+					bspush 25;
+					bspush 101;
+					bastore;
+					dup;
+					bspush 26;
+					bspush 116;
+					bastore;
+					dup;
+					bspush 27;
+					bspush 101;
+					bastore;
+					dup;
+					bspush 28;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 29;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 30;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 31;
+					bspush 32;
+					bastore;
+					putfield_a 2;		// reference jcotp/JCOTP.TEXT_SETUP_COMPLETE
+					aload_0;
+					bspush 31;
+					newarray 11;
+					dup;
+					sconst_0;
+					bspush 32;
+					bastore;
+					dup;
+					sconst_1;
+					bspush 32;
+					bastore;
+					dup;
+					sconst_2;
+					bspush 32;
+					bastore;
+					dup;
+					sconst_3;
+					bspush 79;
+					bastore;
+					dup;
+					sconst_4;
+					bspush 112;
+					bastore;
+					dup;
+					sconst_5;
+					bspush 101;
+					bastore;
+					dup;
+					bspush 6;
+					bspush 114;
+					bastore;
+					dup;
+					bspush 7;
+					bspush 97;
+					bastore;
+					dup;
+					bspush 8;
+					bspush 116;
+					bastore;
+					dup;
+					bspush 9;
+					bspush 105;
+					bastore;
+					dup;
+					bspush 10;
+					bspush 111;
+					bastore;
+					dup;
+					bspush 11;
+					bspush 110;
+					bastore;
+					dup;
+					bspush 12;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 13;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 14;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 15;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 16;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 17;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 18;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 19;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 20;
+					bspush 70;
+					bastore;
+					dup;
+					bspush 21;
+					bspush 97;
+					bastore;
+					dup;
+					bspush 22;
+					bspush 105;
+					bastore;
+					dup;
+					bspush 23;
+					bspush 108;
+					bastore;
+					dup;
+					bspush 24;
+					bspush 101;
+					bastore;
+					dup;
+					bspush 25;
+					bspush 100;
+					bastore;
+					dup;
+					bspush 26;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 27;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 28;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 29;
+					bspush 32;
+					bastore;
+					dup;
+					bspush 30;
+					bspush 32;
+					bastore;
+					putfield_a 3;		// reference jcotp/JCOTP.TEXT_FAILED
+					aload_0;
+					sconst_4;
+					newarray 11;
+					dup;
+					sconst_0;
+					bspush 79;
+					bastore;
+					dup;
+					sconst_1;
+					bspush 84;
+					bastore;
+					dup;
+					sconst_2;
+					bspush 80;
+					bastore;
+					dup;
+					sconst_3;
+					bspush 58;
+					bastore;
+					putfield_a 4;		// reference jcotp/JCOTP.TEXT_OTP
+					aload_0;
+					aconst_null;
+					putfield_a 5;		// reference jcotp/JCOTP.otpKey
+					aload_0;
+					sconst_3;
+					newarray 11;
+					dup;
+					sconst_0;
+					bspush 49;
+					bastore;
+					dup;
+					sconst_1;
+					bspush 49;
+					bastore;
+					dup;
+					sconst_2;
+					bspush 49;
+					bastore;
+					putfield_a 6;		// reference jcotp/JCOTP.aocPin
+					aload_0;
+					sconst_5;
+					newarray 11;
+					dup;
+					sconst_0;
+					bspush 74;
+					bastore;
+					dup;
+					sconst_1;
+					bspush 67;
+					bastore;
+					dup;
+					sconst_2;
+					bspush 79;
+					bastore;
+					dup;
+					sconst_3;
+					bspush 84;
+					bastore;
+					dup;
+					sconst_4;
+					bspush 80;
+					bastore;
+					putfield_a 7;		// reference jcotp/JCOTP.appName
+					aload_0;
+					bspush 6;
+					newarray 11;
+					dup;
+					sconst_0;
+					bspush 97;
+					bastore;
+					dup;
+					sconst_1;
+					bspush 100;
+					bastore;
+					dup;
+					sconst_2;
+					bspush 109;
+					bastore;
+					dup;
+					sconst_3;
+					bspush 105;
+					bastore;
+					dup;
+					sconst_4;
+					bspush 110;
+					bastore;
+					dup;
+					sconst_5;
+					bspush 49;
+					bastore;
+					putfield_a 8;		// reference jcotp/JCOTP.admName
+					aload_0;
+					sconst_3;
+					newarray 11;
+					dup;
+					sconst_0;
+					bspush 57;
+					bastore;
+					dup;
+					sconst_1;
+					bspush 57;
+					bastore;
+					dup;
+					sconst_2;
+					bspush 57;
+					bastore;
+					putfield_a 9;		// reference jcotp/JCOTP.admPin
+					aload_0;
+					sconst_4;
+					newarray 11;
+					putfield_a 10;		// reference jcotp/JCOTP.expTime
+					bspush 20;
+					sconst_1;
+					invokestatic 31;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+					pop;
+					aload_0;
+					bspush 8;
+					sconst_1;
+					invokestatic 31;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+					putfield_a 11;		// reference jcotp/JCOTP.otpCtr
+					sspush 258;
+					sconst_1;
+					invokestatic 31;		// javacard/framework/JCSystem.makeTransientByteArray(SB)[B
+					putstatic_a 33;		// reference jcotp/JCOTP.b0
+					aload_0;
+					sconst_1;
+					sconst_0;
+					invokestatic 34;		// javacard/security/MessageDigest.getInstance(BZ)Ljavacard/security/MessageDigest;
+					putfield_a 12;		// reference jcotp/JCOTP.hash
+					aload_0;
+					invokevirtual 36;		// register()V
+					return;
+		}
+
+		.method public uninstall()V 8 {
+			.stack 1;
+			.locals 0;
+
+				L0:	aload_0;
+					invokevirtual 37;		// destroyEnv()Z
+					pop;
+					return;
+		}
+
+		.method public process(Ljavacard/framework/APDU;)V 7 {
+			.stack 18;
+			.locals 6;
+
+			.descriptor	Ljavacard/framework/APDU;	2.10;
+
+				L0:	aload_0;
+					invokevirtual 39;		// selectingApplet()Z
+					ifeq L2;
+				L1:	return;
+				L2:	aload_1;
+					invokevirtual 40;		// getBuffer()[B
+					astore_2;
+				L3:	aload_2;
+					sconst_0;
+					baload;
+					bspush -80;
+					if_scmpne L14;
+				L4:	aload_2;
+					sconst_1;
+					baload;
+					ifne L14;
+				L5:	getfield_a_this 0;		// reference jcotp/JCOTP.api
+					ifnonnull_w L42;
+				L6:	aload_0;
+					getstatic_a 41;		// reference jcotp/JCOTP.serverAID
+					sconst_0;
+					getstatic_a 41;		// reference jcotp/JCOTP.serverAID
+					arraylength;
+					s2b;
+					invokestatic 42;		// javacard/framework/JCSystem.lookupAID([BSB)Ljavacard/framework/AID;
+					putfield_a 13;		// reference jcotp/JCOTP.apiAID
+				L7:	goto L10;
+				L8:	astore_3;
+				L9:	sspush 27266;
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+				L10:	getfield_a_this 13;		// reference jcotp/JCOTP.apiAID
+					ifnull L13;
+				L11:	aload_0;
+					getfield_a_this 13;		// reference jcotp/JCOTP.apiAID
+					sconst_0;
+					invokestatic 45;		// javacard/framework/JCSystem.getAppletShareableInterfaceObject(Ljavacard/framework/AID;B)Ljavacard/framework/Shareable;
+					checkcast 0 46;		// T_CLASSORINTERFACE KM101/T101OpenAPI
+					putfield_a 0;		// reference jcotp/JCOTP.api
+					getfield_a_this 0;		// reference jcotp/JCOTP.api
+					ifnonnull_w L42;
+				L12:	sspush 27033;
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+					goto_w L42;
+				L13:	sspush 27013;
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+					goto_w L42;
+				L14:	aload_2;
+					sconst_0;
+					baload;
+					bspush -80;
+					if_scmpne L17;
+				L15:	aload_2;
+					sconst_1;
+					baload;
+					sconst_m1;
+					if_scmpne L17;
+				L16:	aload_0;
+					getfield_a_this 6;		// reference jcotp/JCOTP.aocPin
+					sconst_0;
+					getfield_a_this 6;		// reference jcotp/JCOTP.aocPin
+					arraylength;
+					getfield_a_this 7;		// reference jcotp/JCOTP.appName
+					sconst_0;
+					getfield_a_this 7;		// reference jcotp/JCOTP.appName
+					arraylength;
+					getfield_a_this 8;		// reference jcotp/JCOTP.admName
+					sconst_0;
+					getfield_a_this 8;		// reference jcotp/JCOTP.admName
+					arraylength;
+					getfield_a_this 9;		// reference jcotp/JCOTP.admPin
+					sconst_0;
+					getfield_a_this 9;		// reference jcotp/JCOTP.admPin
+					arraylength;
+					getfield_a_this 10;		// reference jcotp/JCOTP.expTime
+					sconst_0;
+					sconst_4;
+					aload_2;
+					invokevirtual 47;		// initEnv([BSS[BSS[BSS[BSS[BSS[B)V
+					goto_w L42;
+				L17:	aload_2;
+					sconst_0;
+					baload;
+					bspush -80;
+					if_scmpne L22;
+				L18:	aload_2;
+					sconst_1;
+					baload;
+					sconst_1;
+					if_scmpne L22;
+				L19:	getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					aload_1;
+					invokevirtual 48;		// setIncomingAndReceive()S
+					sastore;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					sconst_0;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					arraylength;
+					sconst_0;
+					invokestatic 25;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					saload;
+					ifle L21;
+				L20:	getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					aload_2;
+					sconst_5;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					saload;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					sconst_1;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					sconst_0;
+					baload;
+					invokestatic 49;		// jcotp/UtilBase32.base32toByteArray([BSS[BSB)S
+					sastore;
+					aload_0;
+					aconst_null;
+					putfield_a 5;		// reference jcotp/JCOTP.otpKey
+					aload_0;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					saload;
+					newarray 11;
+					putfield_a 5;		// reference jcotp/JCOTP.otpKey
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					sconst_1;
+					getfield_a_this 5;		// reference jcotp/JCOTP.otpKey
+					sconst_0;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					saload;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					goto_w L42;
+				L21:	sspush 27012;
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+					goto_w L42;
+				L22:	aload_2;
+					sconst_0;
+					baload;
+					bspush -80;
+					if_scmpne_w L32;
+				L23:	aload_2;
+					sconst_1;
+					baload;
+					sconst_2;
+					if_scmpne_w L32;
+				L24:	getstatic_a 33;		// reference jcotp/JCOTP.b0
+					sconst_0;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					arraylength;
+					sconst_0;
+					invokestatic 25;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					getfield_a_this 11;		// reference jcotp/JCOTP.otpCtr
+					sconst_0;
+					getfield_a_this 11;		// reference jcotp/JCOTP.otpCtr
+					arraylength;
+					sconst_0;
+					invokestatic 25;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					getfield_a_this 0;		// reference jcotp/JCOTP.api
+					aload_2;
+					sconst_0;
+					invokeinterface 3 46 25;		// KM101/T101OpenAPI
+					pop;
+					aload_2;
+					sconst_0;
+					baload;
+					s2i;
+					bipush 127;
+					iand;
+					bipush 24;
+					ishl;
+					aload_2;
+					sconst_1;
+					baload;
+					s2i;
+					sipush 255;
+					iand;
+					bipush 16;
+					ishl;
+					ior;
+					aload_2;
+					sconst_2;
+					baload;
+					s2i;
+					sipush 255;
+					iand;
+					bipush 8;
+					ishl;
+					ior;
+					aload_2;
+					sconst_3;
+					baload;
+					s2i;
+					sipush 255;
+					iand;
+					sipush 255;
+					iand;
+					ior;
+					istore_3;
+				L25:	iload_3;
+					bipush 30;
+					idiv;
+					istore 5;
+				L26:	getfield_a_this 11;		// reference jcotp/JCOTP.otpCtr
+					sconst_4;
+					iload 5;
+					invokestatic 14;		// jcotp/Codec.intToBytes([BSI)V
+					getfield_a_this 5;		// reference jcotp/JCOTP.otpKey
+					ifnull L30;
+				L27:	getfield_a_this 12;		// reference jcotp/JCOTP.hash
+					getfield_a_this 5;		// reference jcotp/JCOTP.otpKey
+					sconst_0;
+					getfield_a_this 5;		// reference jcotp/JCOTP.otpKey
+					arraylength;
+					getfield_a_this 11;		// reference jcotp/JCOTP.otpCtr
+					sconst_0;
+					getfield_a_this 11;		// reference jcotp/JCOTP.otpCtr
+					arraylength;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					sconst_0;
+					aload_2;
+					sconst_0;
+					invokestatic 50;		// jcotp/HOTPEngine.generateOTP(Ljavacard/security/MessageDigest;[BSS[BSS[BS[BS)S
+					sstore 7;
+				L28:	getstatic_a 33;		// reference jcotp/JCOTP.b0
+					sconst_0;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					arraylength;
+					bspush 32;
+					invokestatic 25;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					aload_2;
+					sconst_4;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					bspush 37;
+					sload 7;
+					sconst_4;
+					ssub;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					getfield_a_this 4;		// reference jcotp/JCOTP.TEXT_OTP
+					sconst_0;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					sconst_0;
+					getfield_a_this 4;		// reference jcotp/JCOTP.TEXT_OTP
+					arraylength;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					aload_0;
+					sconst_2;
+					sconst_0;
+					sconst_0;
+					sconst_0;
+					sconst_0;
+					getfield_a_this 4;		// reference jcotp/JCOTP.TEXT_OTP
+					sconst_0;
+					getfield_a_this 4;		// reference jcotp/JCOTP.TEXT_OTP
+					arraylength;
+					sconst_1;
+					ssub;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					sconst_0;
+					bspush 48;
+					getfield_a_this 6;		// reference jcotp/JCOTP.aocPin
+					sconst_0;
+					getfield_a_this 6;		// reference jcotp/JCOTP.aocPin
+					arraylength;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					bspush 48;
+					aload_2;
+					invokevirtual 51;		// uxRender(BBBBB[BSS[BSS[BSS[BS[B)S
+					pop;
+				L29:	goto_w L42;
+				L30:	sspush 27010;
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+				L31:	goto_w L42;
+				L32:	aload_2;
+					sconst_0;
+					baload;
+					bspush -80;
+					if_scmpne L35;
+				L33:	aload_2;
+					sconst_1;
+					baload;
+					sconst_3;
+					if_scmpne L35;
+				L34:	aload_1;
+					invokevirtual 52;		// setOutgoing()S
+					pop;
+					aload_1;
+					getfield_a_this 5;		// reference jcotp/JCOTP.otpKey
+					arraylength;
+					invokevirtual 53;		// setOutgoingLength(S)V
+					aload_1;
+					getfield_a_this 5;		// reference jcotp/JCOTP.otpKey
+					sconst_0;
+					getfield_a_this 5;		// reference jcotp/JCOTP.otpKey
+					arraylength;
+					invokevirtual 54;		// sendBytesLong([BSS)V
+					goto L42;
+				L35:	aload_2;
+					sconst_0;
+					baload;
+					bspush -80;
+					if_scmpne L38;
+				L36:	aload_2;
+					sconst_1;
+					baload;
+					bspush 14;
+					if_scmpne L38;
+				L37:	getfield_a_this 0;		// reference jcotp/JCOTP.api
+					aload_2;
+					sconst_0;
+					invokeinterface 3 46 25;		// KM101/T101OpenAPI
+					pop;
+					aload_1;
+					invokevirtual 52;		// setOutgoing()S
+					pop;
+					aload_1;
+					sconst_4;
+					invokevirtual 53;		// setOutgoingLength(S)V
+					aload_1;
+					sconst_0;
+					sconst_4;
+					invokevirtual 55;		// sendBytes(SS)V
+					goto L42;
+				L38:	aload_2;
+					sconst_0;
+					baload;
+					bspush -80;
+					if_scmpne L41;
+				L39:	aload_2;
+					sconst_1;
+					baload;
+					bspush 15;
+					if_scmpne L41;
+				L40:	aload_1;
+					invokevirtual 52;		// setOutgoing()S
+					pop;
+					aload_1;
+					sspush 256;
+					invokevirtual 53;		// setOutgoingLength(S)V
+					aload_1;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					sconst_0;
+					sspush 256;
+					invokevirtual 54;		// sendBytesLong([BSS)V
+					goto L42;
+				L41:	sspush 27904;
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+				L42:	return;
+			.exceptionTable {
+				// start_block end_block handler_block catch_type_index
+				L6 L7 L8 38;
+			}
+		}
+
+		.method public destroyEnv()Z 9 {
+			.stack 1;
+			.locals 0;
+
+				L0:	getfield_a_this 0;		// reference jcotp/JCOTP.api
+					ifnull L2;
+				L1:	getfield_a_this 0;		// reference jcotp/JCOTP.api
+					invokeinterface 1 46 2;		// KM101/T101OpenAPI
+					pop;
+					sconst_1;
+					sreturn;
+				L2:	sconst_0;
+					sreturn;
+		}
+
+		.method public initEnv([BSS[BSS[BSS[BSS[BSS[B)V 10 {
+			.stack 18;
+			.locals 2;
+
+				L0:	sconst_0;
+					sstore 17;
+				L1:	getfield_a_this 0;		// reference jcotp/JCOTP.api
+					ifnull_w L21;
+				L2:	getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					bspush 6;
+					sload_3;
+					sadd;
+					sload 6;
+					sadd;
+					sastore;
+					aload 16;
+					sconst_0;
+					sspush 256;
+					sconst_0;
+					invokestatic 25;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					aload 16;
+					sconst_0;
+					bspush -128;
+					bastore;
+					aload_1;
+					sload_2;
+					aload 16;
+					sconst_1;
+					sload_3;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					aload 4;
+					sload 5;
+					aload 16;
+					sconst_1;
+					sload_3;
+					sadd;
+					sload 6;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					aload 13;
+					sload 14;
+					aload 16;
+					sconst_1;
+					sload_3;
+					sadd;
+					sload 6;
+					sadd;
+					sconst_4;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					getfield_a_this 0;		// reference jcotp/JCOTP.api
+					aload 16;
+					sconst_0;
+					baload;
+					aload 16;
+					sconst_1;
+					sload_3;
+					sload 15;
+					aload 16;
+					sconst_1;
+					sload_3;
+					sadd;
+					sload 6;
+					aload 16;
+					sconst_1;
+					sload_3;
+					sadd;
+					sload 6;
+					sadd;
+					invokeinterface 11 46 0;		// KM101/T101OpenAPI
+					sstore 17;
+					sload 17;
+					ifne L4;
+				L3:	bspush 111;
+					bspush 47;
+					invokestatic 56;		// javacard/framework/Util.makeShort(BB)S
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+				L4:	sload 17;
+					ifeq L10;
+				L5:	aload_0;
+					aload 7;
+					sload 8;
+					sload 9;
+					aload 10;
+					sload 11;
+					sload 12;
+					aload 13;
+					sload 14;
+					aload_1;
+					sload_2;
+					sload_3;
+					aload 16;
+					invokevirtual 57;		// enrollNewAdminUsers([BSS[BSS[BS[BSS[B)Z
+					sstore 17;
+				L6:	goto L11;
+				L7:	astore 18;
+				L8:	bspush 111;
+					bspush -14;
+					invokestatic 56;		// javacard/framework/Util.makeShort(BB)S
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+				L9:	goto L11;
+				L10:	bspush 111;
+					bspush -95;
+					invokestatic 56;		// javacard/framework/Util.makeShort(BB)S
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+				L11:	sload 17;
+					ifeq L17;
+				L12:	aload_0;
+					aload_1;
+					sload_2;
+					sload_3;
+					aload 16;
+					invokevirtual 58;		// finalizeContainer([BSS[B)Z
+					sstore 17;
+				L13:	goto L18;
+				L14:	astore 18;
+				L15:	bspush 111;
+					bspush -13;
+					invokestatic 56;		// javacard/framework/Util.makeShort(BB)S
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+				L16:	goto L18;
+				L17:	bspush 111;
+					bspush -94;
+					invokestatic 56;		// javacard/framework/Util.makeShort(BB)S
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+				L18:	sload 17;
+					ifeq L20;
+				L19:	aload_0;
+					sconst_2;
+					sconst_0;
+					sconst_0;
+					sconst_0;
+					sconst_0;
+					getfield_a_this 2;		// reference jcotp/JCOTP.TEXT_SETUP_COMPLETE
+					sconst_5;
+					sconst_5;
+					getfield_a_this 2;		// reference jcotp/JCOTP.TEXT_SETUP_COMPLETE
+					sconst_0;
+					getfield_a_this 2;		// reference jcotp/JCOTP.TEXT_SETUP_COMPLETE
+					arraylength;
+					aload_1;
+					sload_2;
+					sload_3;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					sconst_0;
+					aload 16;
+					invokevirtual 51;		// uxRender(BBBBB[BSS[BSS[BSS[BS[B)S
+					pop;
+					goto L21;
+				L20:	sspush 27013;
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+				L21:	return;
+			.exceptionTable {
+				// start_block end_block handler_block catch_type_index
+				L5 L6 L7 38;
+				L12 L13 L14 38;
+			}
+		}
+
+		.method public authContainer([BSS[BS[B)S 11 {
+			.stack 16;
+			.locals 0;
+
+				L0:	aload 6;
+					sconst_0;
+					sconst_4;
+					bastore;
+					aload_1;
+					sload_2;
+					aload 6;
+					sconst_1;
+					sload_3;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					aload 4;
+					sload 5;
+					aload 6;
+					sconst_1;
+					sload_3;
+					sadd;
+					bspush 8;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					getfield_a_this 0;		// reference jcotp/JCOTP.api
+					aload 6;
+					sconst_0;
+					baload;
+					aload 6;
+					sconst_1;
+					sload_3;
+					aload 6;
+					sconst_1;
+					sload_3;
+					sadd;
+					bspush 8;
+					aload 6;
+					bspush 9;
+					sload_3;
+					sadd;
+					aload 6;
+					bspush 73;
+					sload_3;
+					sadd;
+					aload 6;
+					sspush 137;
+					sload_3;
+					sadd;
+					aload 6;
+					sspush 201;
+					invokeinterface 16 46 23;		// KM101/T101OpenAPI
+					pop;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					getfield_a_this 0;		// reference jcotp/JCOTP.api
+					aload 6;
+					sspush 201;
+					bspush 32;
+					aload 6;
+					sconst_0;
+					invokeinterface 6 46 20;		// KM101/T101OpenAPI
+					sastore;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					saload;
+					sreturn;
+		}
+
+		.method public finalizeContainer([BSS[B)Z 12 {
+			.stack 7;
+			.locals 0;
+
+				L0:	getfield_a_this 0;		// reference jcotp/JCOTP.api
+					aload 4;
+					sconst_0;
+					invokeinterface 3 46 1;		// KM101/T101OpenAPI
+					ifeq L3;
+				L1:	aload 4;
+					sconst_0;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					sconst_0;
+					bspush 8;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					aload_0;
+					aload_1;
+					sload_2;
+					sload_3;
+					getstatic_a 33;		// reference jcotp/JCOTP.b0
+					sconst_0;
+					aload 4;
+					invokevirtual 59;		// authContainer([BSS[BS[B)S
+					sconst_1;
+					if_scmpne L3;
+				L2:	sconst_1;
+					sreturn;
+				L3:	sconst_0;
+					sreturn;
+		}
+
+		.method public enrollNewAdminUsers([BSS[BSS[BS[BSS[B)Z 13 {
+			.stack 19;
+			.locals 0;
+
+				L0:	aload 12;
+					sconst_0;
+					bspush -128;
+					bastore;
+					aload 12;
+					sconst_1;
+					sconst_1;
+					bastore;
+					aload 4;
+					sload 5;
+					aload 12;
+					sconst_2;
+					sload 6;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					aload_1;
+					sload_2;
+					aload 12;
+					sconst_2;
+					sload 6;
+					sadd;
+					sload_3;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					aload 7;
+					sload 8;
+					aload 12;
+					sconst_2;
+					sload 6;
+					sadd;
+					sload_3;
+					sadd;
+					sconst_4;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					getfield_a_this 0;		// reference jcotp/JCOTP.api
+					aload 12;
+					sconst_0;
+					baload;
+					aload 12;
+					sconst_2;
+					sload 6;
+					sconst_3;
+					aload 12;
+					sconst_2;
+					sload 6;
+					sadd;
+					sload_3;
+					aload 12;
+					sconst_2;
+					sload 6;
+					sadd;
+					sload_3;
+					sadd;
+					sconst_0;
+					aconst_null;
+					sconst_0;
+					sconst_0;
+					sconst_2;
+					aload 12;
+					bspush 6;
+					sload 6;
+					sadd;
+					sload_3;
+					sadd;
+					invokeinterface 18 46 5;		// KM101/T101OpenAPI
+					ifeq L4;
+				L1:	aload_0;
+					aload 9;
+					sload 10;
+					sload 11;
+					aload 12;
+					bspush 6;
+					sload 6;
+					sadd;
+					sload_3;
+					sadd;
+					aload 12;
+					invokevirtual 59;		// authContainer([BSS[BS[B)S
+					sconst_1;
+					if_scmpne L3;
+				L2:	sconst_1;
+					sreturn;
+				L3:	bspush 111;
+					bspush 21;
+					invokestatic 56;		// javacard/framework/Util.makeShort(BB)S
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+					goto L5;
+				L4:	bspush 111;
+					bspush 20;
+					invokestatic 56;		// javacard/framework/Util.makeShort(BB)S
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+				L5:	sconst_0;
+					sreturn;
+		}
+
+		.method public uxRender(BBBBB[BSS[BSS[BSS[BS[B)S 14 {
+			.stack 18;
+			.locals 0;
+
+				L0:	aload 17;
+					sconst_0;
+					sload_1;
+					bastore;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_1;
+					sconst_0;
+					sastore;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_2;
+					sconst_0;
+					sastore;
+					aload 6;
+					ifnull L3;
+				L1:	sload 8;
+					ifle L3;
+				L2:	aload 6;
+					sload 7;
+					aload 17;
+					sconst_1;
+					sload 8;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_1;
+					sload 8;
+					sastore;
+				L3:	aload 9;
+					ifnull L6;
+				L4:	sload 11;
+					ifle L6;
+				L5:	aload 9;
+					sload 10;
+					aload 17;
+					sconst_1;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_1;
+					saload;
+					sadd;
+					sload 11;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_2;
+					sload 11;
+					sastore;
+				L6:	getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					getfield_a_this 0;		// reference jcotp/JCOTP.api
+					aload 17;
+					sconst_0;
+					baload;
+					sload_2;
+					sload_3;
+					sload 4;
+					sload 5;
+					aload 17;
+					sconst_1;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_1;
+					saload;
+					aload 17;
+					sconst_1;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_1;
+					saload;
+					sadd;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_2;
+					saload;
+					aload 17;
+					sconst_1;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_1;
+					saload;
+					sadd;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_2;
+					saload;
+					sadd;
+					invokeinterface 14 46 24;		// KM101/T101OpenAPI
+					sastore;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					saload;
+					sconst_m1;
+					if_scmpeq L10;
+				L7:	aload 17;
+					sconst_1;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_1;
+					saload;
+					sadd;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_2;
+					saload;
+					sadd;
+					aload 15;
+					sload 16;
+					bspush 8;
+					invokestatic 28;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					aload_0;
+					aload 12;
+					sload 13;
+					sload 14;
+					aload 15;
+					sload 16;
+					aload 17;
+					invokevirtual 59;		// authContainer([BSS[BS[B)S
+					sastore;
+					getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					saload;
+					sconst_m1;
+					if_scmple L9;
+				L8:	getfield_a_this 1;		// reference jcotp/JCOTP.sb
+					sconst_0;
+					saload;
+					sreturn;
+				L9:	bspush 111;
+					bspush -62;
+					invokestatic 56;		// javacard/framework/Util.makeShort(BB)S
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+					goto L11;
+				L10:	bspush 111;
+					bspush -63;
+					invokestatic 56;		// javacard/framework/Util.makeShort(BB)S
+					invokestatic 44;		// javacard/framework/ISOException.throwIt(S)V
+				L11:	sconst_m1;
+					sreturn;
+		}
+
+	}
+
+	.class public UtilBase32 4 extends 0.0 {		// extends java/lang/Object
+
+		.publicMethodTable 1 {
+			equals(Ljava/lang/Object;)Z;
+		}
+
+		.packageMethodTable 0 {
+		}
+
+		.method public <init>()V 0 {
+			.stack 1;
+			.locals 0;
+
+				L0:	aload_0;
+					invokespecial 19;		// java/lang/Object.<init>()V
+					return;
+		}
+
+		.method public static base32toByte(B)B 1 {
+			.stack 2;
+			.locals 0;
+
+				L0:	sload_0;
+					bspush 65;
+					if_scmplt L3;
+				L1:	sload_0;
+					bspush 90;
+					if_scmpgt L3;
+				L2:	sload_0;
+					bspush 65;
+					ssub;
+					s2b;
+					sreturn;
+				L3:	sload_0;
+					bspush 50;
+					if_scmplt L6;
+				L4:	sload_0;
+					bspush 55;
+					if_scmpgt L6;
+				L5:	sload_0;
+					bspush 50;
+					ssub;
+					bspush 26;
+					sadd;
+					s2b;
+					sreturn;
+				L6:	sconst_0;
+					sreturn;
+		}
+
+		.method private static shiftByte(BS)B {
+			.stack 2;
+			.locals 0;
+
+				L0:	sload_1;
+					ifle L2;
+				L1:	sload_0;
+					sload_1;
+					sshl;
+					s2b;
+					sreturn;
+				L2:	sload_0;
+					sload_1;
+					sneg;
+					sshr;
+					sreturn;
+		}
+
+		.method public static base32toByteArray([BSS[BSB)S 2 {
+			.stack 6;
+			.locals 4;
+
+				L0:	sconst_0;
+					sstore 6;
+				L1:	sload_1;
+					sstore 9;
+				L2:	goto L10;
+				L3:	aload_0;
+					sload 9;
+					baload;
+					invokestatic 60;		// jcotp/UtilBase32.base32toByte(B)B
+					sstore 5;
+					aload_0;
+					sload 9;
+					baload;
+					bspush 61;
+					if_scmpne L5;
+				L4:	sload 6;
+					bspush 8;
+					sdiv;
+					sreturn;
+				L5:	sload 6;
+					bspush 8;
+					sdiv;
+					sstore 7;
+				L6:	sload 6;
+					bspush 8;
+					srem;
+					sstore 8;
+				L7:	aload_3;
+					sload 4;
+					sload 7;
+					sadd;
+					aload_3;
+					sload 4;
+					sload 7;
+					sadd;
+					baload;
+					sload 5;
+					sconst_3;
+					sload 8;
+					ssub;
+					invokestatic 61;		// jcotp/UtilBase32.shiftByte(BS)B
+					sor;
+					bastore;
+					sload 8;
+					sconst_3;
+					if_scmple L9;
+				L8:	aload_3;
+					sload 6;
+					bspush 8;
+					sdiv;
+					sconst_1;
+					sadd;
+					sload 4;
+					sadd;
+					aload_3;
+					sload 7;
+					sconst_1;
+					sadd;
+					sload 4;
+					sadd;
+					baload;
+					sload 5;
+					bspush 11;
+					sload 8;
+					ssub;
+					invokestatic 61;		// jcotp/UtilBase32.shiftByte(BS)B
+					sor;
+					bastore;
+				L9:	sinc 6 5;
+					sinc 9 1;
+				L10:	sload 9;
+					sload_1;
+					sload_2;
+					sadd;
+					if_scmplt L3;
+				L11:	sconst_0;
+					sstore 5;
+					sload 6;
+					bspush 8;
+					sdiv;
+					sreturn;
+		}
+
+	}
+
+}

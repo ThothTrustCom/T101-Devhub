@@ -1,0 +1,36 @@
+package KM101;
+import javacard.framework.Shareable;
+public interface T101OpenAPI extends Shareable {
+boolean createAOCContainer(byte param1, byte[] param2, short param3, short param4, short param5, byte[] param6, short param7, short param8, byte[] param9, short param10);
+boolean finalizeNewContainer(byte[] param1, short param2);
+boolean destroyAOCContainer();
+boolean manageAOCContainer(byte param1, byte[] param2, short param3, short param4, byte[] param5, short param6);
+short getAOCInfo(byte param1, byte[] param2, short param3);
+boolean newAOCUserCred(byte param1, byte[] param2, short param3, short param4, short param5, byte[] param6, short param7, short param8, byte[] param9, short param10, byte param11, byte[] param12, short param13, short param14, byte param15, byte[] param16, short param17);
+boolean manageUserCred(byte param1, byte[] param2, short param3, short param4, byte[] param5, short param6, byte param7, byte[] param8, short param9, short param10, byte param11);
+boolean resetAOCUserCred(byte[] param1, short param2, short param3, byte[] param4, short param5, short param6, byte param7, byte[] param8, short param9, short param10, byte param11, byte[] param12, short param13);
+short listAOCUsers(byte param1, byte[] param2, short param3, short param4, byte[] param5, short param6, byte param7);
+short getUserInfo(byte param1, byte[] param2, short param3, short param4, byte param5, byte[] param6, short param7, short param8, byte param9, byte[] param10, short param11, byte param12);
+boolean importLocalGlobalUserCredToAOC(byte param1, byte[] param2, short param3, short param4, byte[] param5, short param6, short param7, byte[] param8, short param9, byte param10);
+boolean promoteAOCUserCred(byte param1, byte[] param2, short param3, short param4, byte param5, byte[] param6, short param7, short param8, byte[] param9, short param10, byte param11);
+boolean deleteUserCred(byte param1, byte[] param2, short param3, short param4, byte param5, byte[] param6, short param7, short param8, byte[] param9, short param10, byte param11);
+boolean newObject(byte param1, byte[] param2, short param3, short param4, byte[] param5, short param6, short param7, byte[] param8, short param9, short param10, byte param11, byte param12, byte param13, byte param14, boolean param15, byte[] param16, short param17, byte param18, byte[] param19, short param20, short param21, byte[] param22, short param23, byte param24);
+short manageObject(byte[] param1, short param2, short param3, byte param4, byte[] param5, short param6, short param7, byte[] param8, short param9, boolean param10, byte param11, byte[] param12, short param13, short param14, byte param15);
+short listObjects(byte[] param1, short param2, byte param3, byte[] param4, short param5, short param6, byte param7);
+short getObjectInfo(byte[] param1, short param2, short param3, byte param4, byte[] param5, short param6, byte param7, byte[] param8, short param9, short param10, byte param11);
+short getObjectMaterial(byte[] param1, short param2, short param3, boolean param4, byte[] param5, short param6, byte param7, byte[] param8, short param9, short param10, byte param11);
+short executeObject(byte param1, byte param2, byte param3, boolean param4, byte[] param5, short param6, short param7, byte[] param8, short param9, short param10, byte[] param11, short param12, byte param13, byte[] param14, short param15, short param16, byte param17);
+boolean deleteObject(byte[] param1, short param2, short param3, byte[] param4, short param5, byte param6, byte[] param7, short param8, short param9, byte param10);
+short extendedRequest(byte[] param1, short param2, short param3, byte[] param4, short param5);
+short importExportObject(boolean param1, byte param2, byte param3, byte[] param4, short param5, short param6, byte[] param7, short param8, short param9, byte[] param10, short param11, short param12, byte[] param13, short param14, byte param15, byte[] param16, short param17, short param18, byte param19);
+short cryptoChaCha20(byte[] param1, short param2, byte[] param3, short param4, byte[] param5, short param6, byte[] param7, short param8, short param9, byte[] param10, short param11);
+short cryptoHMAC(byte param1, byte[] param2, short param3, short param4, byte[] param5, short param6, short param7, byte[] param8, short param9, byte[] param10, short param11, byte[] param12, short param13, byte[] param14, short param15);
+short uiSession(byte param1, byte param2, byte param3, byte param4, byte param5, byte[] param6, short param7, short param8, byte[] param9, short param10, short param11, byte[] param12, short param13);
+boolean getTime(byte[] param1, short param2);
+boolean isSessionBusy();
+void resetSession();
+short bufferData(boolean param1, short param2, byte[] param3, short param4, short param5, short param6, byte[] param7, short param8);
+short getBufferDataLength();
+short clearBuffer(byte[] param1, short param2);
+short hexStrToBin(byte[] param1, short param2, byte[] param3, short param4, short param5);
+}
