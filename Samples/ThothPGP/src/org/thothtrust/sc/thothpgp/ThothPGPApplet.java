@@ -7,6 +7,7 @@
  */
 package org.thothtrust.sc.thothpgp;
 
+import org.thothtrust.sc.certstore.CertStoreAPI;
 import org.thothtrust.sc.thothpgp.Common;
 import org.thothtrust.sc.thothpgp.Constants;
 import org.thothtrust.sc.thothpgp.ECCurves;
@@ -14,8 +15,8 @@ import org.thothtrust.sc.thothpgp.PGPKey;
 import org.thothtrust.sc.thothpgp.Persistent;
 import org.thothtrust.sc.thothpgp.SecureMessaging;
 import org.thothtrust.sc.thothpgp.Transients;
+import KM101.T101OpenAPI;
 import javacard.framework.*;
-import javacardx.annotations.*;
 import javacard.security.*;
 import javacardx.crypto.*;
 
@@ -33,27 +34,29 @@ import javacardx.crypto.*;
  * @author ANSSI
  * @author ThothTrust Pte Ltd.
  */
-@StringPool(value = { @StringDef(name = "Package", value = "org.thothtrust.sc.thothpgp"),
-		@StringDef(name = "AppletName", value = "ThothPGPApplet") },
-		// Insert your strings here
-		name = "ThothPGPAppletStrings")
-public class ThothPGPApplet extends Applet {
+public class ThothPGPApplet extends Applet implements AppletEvent {
 
-	private final ECCurves ec;
-	private final Persistent data;
-	private final SecureMessaging sm;
-
-	private final Transients transients;
-
-	private final Cipher cipher_aes_cbc_nopad;
-	private final RandomData random_data;
+	private ECCurves ec = null;
+	private Persistent data = null;
+	private SecureMessaging sm = null;
+	private Transients transients = null;
+	public static Cipher cipher_aes_cbc_nopad = null;
+	public static RandomData random_data = null;
+	public static T101OpenAPI api = null;
+	public static CertStoreAPI csapi = null;
+	public static APIShim apishim = null;
+	public AID apiAID = null;
+	public AID csapiAID = null;
+	public static byte[] serverAID = new byte[] { (byte) 0x4B, (byte) 0x4D, (byte) 0x31, (byte) 0x30, (byte) 0x31,
+			(byte) 0x00 };
+	public static byte[] csServerAID = new byte[] { (byte) 0x54, (byte) 0x54, (byte) 0x43, (byte) 0x52, (byte) 0x53,
+			(byte) 0xFF };
+	public static byte[] debug = new byte[5];
 
 	public ThothPGPApplet() {
 		cipher_aes_cbc_nopad = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
 		random_data = RandomData.getInstance(RandomData.ALG_SECURE_RANDOM);
-
 		ec = new ECCurves();
-
 		data = new Persistent();
 		transients = new Transients();
 		sm = new SecureMessaging(transients);
@@ -61,6 +64,42 @@ public class ThothPGPApplet extends Applet {
 
 	public static final void install(byte[] buf, short off, byte len) {
 		new ThothPGPApplet().register(buf, (short) (off + 1), buf[off]);
+	}
+
+	public void uninstall() {
+		destroyEnv();
+	}
+
+	public boolean destroyEnv() {
+		if (api != null) {
+			api.destroyAOCContainer();
+			return true;
+		}
+
+		return false;
+	}
+
+	private final void initAPI(byte[] apdubuf) {
+		if (api == null && csapi == null) {
+			try {
+				apiAID = JCSystem.lookupAID(serverAID, (short) 0, (byte) serverAID.length);
+				csapiAID = JCSystem.lookupAID(csServerAID, (short) 0, (byte) csServerAID.length);
+			} catch (Exception e) {
+				ISOException.throwIt(ISO7816.SW_FILE_NOT_FOUND);
+			}
+			if (apiAID != null && csapiAID != null) {
+				api = (T101OpenAPI) JCSystem.getAppletShareableInterfaceObject(apiAID, (byte) 0);
+				csapi = (CertStoreAPI) JCSystem.getAppletShareableInterfaceObject(csapiAID, (byte) 0);
+				if (api == null && csapi == null) {
+					ISOException.throwIt(ISO7816.SW_APPLET_SELECT_FAILED);
+				}
+				apishim = new APIShim();
+				api.destroyAOCContainer();
+				apishim.initEnv(apdubuf);
+			} else {
+				ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
+			}
+		}
 	}
 
 	private final PGPKey currentTagOccurenceToKey() {
@@ -74,8 +113,28 @@ public class ThothPGPApplet extends Applet {
 		case 3:
 			return sm.static_key;
 		default:
-			ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
+			debug[0] = (byte) 0x31;
+//			ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
+			ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x31));
 			return null;
+		}
+	}
+
+	private final byte currentTagOccurenceToKeyInd() {
+		switch (transients.currentTagOccurrence()) {
+		case 0:
+			return Persistent.PGP_KEYS_OFFSET_AUT;
+		case 1:
+			return Persistent.PGP_KEYS_OFFSET_DEC;
+		case 2:
+			return Persistent.PGP_KEYS_OFFSET_SIG;
+		case 3:
+			return (byte) 0xFF;
+		default:
+			debug[0] = (byte) 0x32;
+//			ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
+			ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x32));
+			return (byte) 0x0F;
 		}
 	}
 
@@ -156,19 +215,19 @@ public class ThothPGPApplet extends Applet {
 	}
 
 	private final void assertAdmin() {
-		if (!data.admin_pin.isValidated()) {
+		if (!transients.userPinMode83()) {
 			ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
 		}
 	}
 
 	private final void assertUserMode81() {
-		if (!data.user_pin.isValidated() || !transients.userPinMode81()) {
+		if (!transients.userPinMode81()) {
 			ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
 		}
 	}
 
 	private final void assertUserMode82() {
-		if (!data.user_pin.isValidated() || !transients.userPinMode82()) {
+		if (!transients.userPinMode82()) {
 			ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
 		}
 	}
@@ -187,9 +246,9 @@ public class ThothPGPApplet extends Applet {
 			buf[off++] = Constants.ADMIN_PIN_MAX_SIZE;
 		}
 
-		buf[off++] = data.user_pin.getTriesRemaining();
-		buf[off++] = data.user_puk.getTriesRemaining();
-		buf[off++] = data.admin_pin.getTriesRemaining();
+		buf[off++] = -1; // data.user_pin.getTriesRemaining();
+		buf[off++] = -1; // data.user_puk.getTriesRemaining();
+		buf[off++] = -1; // data.admin_pin.getTriesRemaining();
 
 		return off;
 	}
@@ -208,11 +267,16 @@ public class ThothPGPApplet extends Applet {
 		return off;
 	}
 
-	private final short writeKeyGenerationDates(final byte[] buf, short off) {
-		for (byte i = 0; i < data.pgp_keys.length; ++i) {
-			off = Util.arrayCopyNonAtomic(data.pgp_keys[i].generation_date, (short) 0, buf, off,
-					Constants.GENERATION_DATE_SIZE);
-		}
+	private final short getKeyGenerationDates(final byte[] buf, short off, byte[] apduBuffer) {
+		ThothPGPApplet.apishim.getObjectCreationTS(ThothPGPApplet.apishim.getKeyHandle(Persistent.PGP_KEYS_OFFSET_AUT),
+				(short) 0, (short) 4, apduBuffer);
+		off = Util.arrayCopyNonAtomic(apduBuffer, (short) 0, buf, off, Constants.GENERATION_DATE_SIZE);
+		ThothPGPApplet.apishim.getObjectCreationTS(ThothPGPApplet.apishim.getKeyHandle(Persistent.PGP_KEYS_OFFSET_DEC),
+				(short) 0, (short) 4, apduBuffer);
+		off = Util.arrayCopyNonAtomic(apduBuffer, (short) 0, buf, off, Constants.GENERATION_DATE_SIZE);
+		ThothPGPApplet.apishim.getObjectCreationTS(ThothPGPApplet.apishim.getKeyHandle(Persistent.PGP_KEYS_OFFSET_SIG),
+				(short) 0, (short) 4, apduBuffer);
+		off = Util.arrayCopyNonAtomic(apduBuffer, (short) 0, buf, off, Constants.GENERATION_DATE_SIZE);
 		return off;
 	}
 
@@ -244,7 +308,7 @@ public class ThothPGPApplet extends Applet {
 		}
 	}
 
-	private final short processGetData(final byte p1, final byte p2) {
+	private final short processGetData(final byte p1, final byte p2, byte[] apduBuffer) {
 
 		final short tag = Util.makeShort(p1, p2);
 		short off = 0;
@@ -299,7 +363,7 @@ public class ThothPGPApplet extends Applet {
 			off = writeCaFingerprints(buf, off);
 			break;
 		case Constants.TAG_KEY_GENERATION_DATES:
-			off = writeKeyGenerationDates(buf, off);
+			off = getKeyGenerationDates(buf, off, apduBuffer);
 			break;
 
 		case Constants.TAG_HISTORICAL_BYTES_CARD_SERVICE_CARD_CAPABILITIES:
@@ -326,10 +390,10 @@ public class ThothPGPApplet extends Applet {
 			off = Common.writeLength(buf, off, (short) 8);
 			buf[off++] = (byte) 0x02;
 			buf[off++] = (byte) 0x02;
-			off = Util.setShort(buf, off, Constants.APDU_MAX_LENGTH);
+			off = Util.setShort(buf, off, (short) 256); // Constants.APDU_MAX_LENGTH = 256;
 			buf[off++] = (byte) 0x02;
 			buf[off++] = (byte) 0x02;
-			off = Util.setShort(buf, off, Constants.APDU_MAX_LENGTH);
+			off = Util.setShort(buf, off, (short) 256);
 			break;
 
 		case Constants.TAG_ALGORITHM_ATTRIBUTES_SIG:
@@ -418,7 +482,7 @@ public class ThothPGPApplet extends Applet {
 
 			buf[off++] = (byte) 0xcd;
 			off = Common.writeLength(buf, off, (short) (3 * Constants.GENERATION_DATE_SIZE));
-			off = writeKeyGenerationDates(buf, off);
+			off = getKeyGenerationDates(buf, off, apduBuffer);
 
 			Common.writeLength(buf, (short) 1, (short) (off - 3));
 			break;
@@ -438,11 +502,14 @@ public class ThothPGPApplet extends Applet {
 			k = currentTagOccurenceToKey();
 
 			if (k == null) {
-				ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
+				debug[0] = (byte) 0x33;
+//				ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
+				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x33));
 				return 0;
 			}
 
-			off = Util.arrayCopyNonAtomic(k.certificate, (short) 0, buf, off, k.certificate_length);
+			off = apishim.readCert(currentTagOccurenceToKeyInd(), buf, off, (short) 0,
+					apishim.certLength(currentTagOccurenceToKeyInd()));
 			break;
 
 		case Constants.TAG_KEY_INFORMATION:
@@ -468,13 +535,13 @@ public class ThothPGPApplet extends Applet {
 			break;
 
 		case Constants.TAG_SECURE_MESSAGING_CERTIFICATE:
-			k = sm.static_key;
-
-			off = Util.arrayCopyNonAtomic(k.certificate, (short) 0, buf, off, k.certificate_length);
+			off = apishim.readCert((byte) 0xFF, buf, off, (short) 0, apishim.certLength((byte) 0xFF));
 			break;
 
 		default:
-			ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
+			debug[0] = (byte) 0x34;
+//			ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
+			ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x34));
 			return 0;
 		}
 
@@ -491,148 +558,105 @@ public class ThothPGPApplet extends Applet {
 		final PGPKey k = currentTagOccurenceToKey();
 
 		if (k == null) {
-			ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
+			debug[0] = (byte) 0x35;
+//			ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
+			ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x35));
 			return 0;
 		}
 
 		transients.setCurrentTagOccurrence((byte) (transients.currentTagOccurrence() + 1));
 
-		return Util.arrayCopyNonAtomic(k.certificate, (short) 0, transients.buffer, (short) 0, k.certificate_length);
+		return apishim.readCert(currentTagOccurenceToKeyInd(), transients.buffer, (short) 0, (short) 0,
+				apishim.certLength(currentTagOccurenceToKeyInd()));
 	}
 
-	private final void processVerify(short lc, final byte p1, final byte p2) {
+	private final void processVerify(short lc, final byte p1, final byte p2, byte[] apduBuffer) {
 
 		sensitiveData();
 
 		if (p1 == 0) {
 
-			if (lc == 0) {
-				byte remaining = 0;
-
-				switch (p2) {
-				case (byte) 0x81:
-					if (data.user_pin.isValidated() && transients.userPinMode81()) {
-						return;
-					}
-					remaining = data.user_pin.getTriesRemaining();
-					break;
-
-				case (byte) 0x82:
-					if (data.user_pin.isValidated() && transients.userPinMode82()) {
-						return;
-					}
-					remaining = data.user_pin.getTriesRemaining();
-					break;
-
-				case (byte) 0x83:
-					if (data.admin_pin.isValidated()) {
-						return;
-					}
-					remaining = data.admin_pin.getTriesRemaining();
-					break;
-
-				default:
-					ISOException.throwIt(ISO7816.SW_WRONG_P1P2);
+			// No PIN retries checking service available.
+			switch (p2) {
+			case (byte) 0x81:
+			case (byte) 0x82:
+				debug[0] = (byte) 0x41;
+				if (p2 == (byte) 0x81) {
+					transients.setUserPinMode81(false);
+				} else {
+					transients.setUserPinMode82(false);
+				}
+				debug[0] = (byte) 0x42;
+				// Login normal user and get tries remaining
+				if (ThothPGPApplet.apishim.loginNormalUserAndGetTries(apduBuffer) == (short) -1) {
+					debug[0] = (byte) 0x43;
+					ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
 					return;
 				}
-
-				remaining = (byte) ((byte) 0xf & remaining);
-				ISOException.throwIt(Util.makeShort((byte) 0x63, (byte) (0xC0 | remaining)));
+				debug[0] = (byte) 0x44;
+				if (p2 == (byte) 0x81) {
+					transients.setUserPinMode81(true);
+				} else {
+					transients.setUserPinMode82(true);
+				}
 				return;
 
-			} else {
-
-				switch (p2) {
-				case (byte) 0x81:
-				case (byte) 0x82:
-					if (data.keyDerivationIsActive()) {
-						if (lc != data.keyDerivationSize()) {
-							ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-							return;
-						}
-					} else {
-						if ((lc < Constants.USER_PIN_MIN_SIZE) || (lc > Constants.USER_PIN_MAX_SIZE)) {
-							ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-							return;
-						}
-					}
-
-					if (p2 == (byte) 0x81) {
-						transients.setUserPinMode81(false);
-					} else {
-						transients.setUserPinMode82(false);
-					}
-
-					if (!data.user_pin.check(transients.buffer, (short) 0, (byte) lc)) {
-						ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
-						return;
-					}
-
-					if (p2 == (byte) 0x81) {
-						transients.setUserPinMode81(true);
-					} else {
-						transients.setUserPinMode82(true);
-					}
-					return;
-
-				case (byte) 0x83:
-					if (data.keyDerivationIsActive()) {
-						if (lc != data.keyDerivationSize()) {
-							ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-							return;
-						}
-					} else {
-						if ((lc < Constants.ADMIN_PIN_MIN_SIZE) || (lc > Constants.ADMIN_PIN_MAX_SIZE)) {
-							ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-							return;
-						}
-					}
-
-					if (!data.admin_pin.check(transients.buffer, (short) 0, (byte) lc)) {
-						ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
-						return;
-					}
-					return;
-
-				default:
-					ISOException.throwIt(ISO7816.SW_WRONG_P1P2);
+			case (byte) 0x83:
+				debug[0] = (byte) 0x45;
+				// Login admin user
+				transients.setUserPinMode83(false);
+				if (ThothPGPApplet.apishim.loginAdminUserAndGetTries(apduBuffer) == (short) -1) {
+					debug[0] = (byte) 0x46;
+					ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
 					return;
 				}
+				debug[0] = (byte) 0x47;
+				transients.setUserPinMode83(true);
+				return;
+
+			default:
+				debug[0] = (byte) 0x48;
+				ISOException.throwIt(ISO7816.SW_WRONG_P1P2);
+				return;
 			}
 
 		} else if (p1 == (byte) 0xff) {
-
+			debug[0] = (byte) 0x49;
 			if (lc != 0) {
+				debug[0] = (byte) 0x4A;
 				ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 				return;
 			}
-
+			debug[0] = (byte) 0x4B;
 			switch (p2) {
 			case (byte) 0x81:
+				debug[0] = (byte) 0x4C;
 				transients.setUserPinMode81(false);
 				return;
 
 			case (byte) 0x82:
+				debug[0] = (byte) 0x4D;
 				transients.setUserPinMode82(false);
 				return;
 
 			case (byte) 0x83:
-				if (data.admin_pin.isValidated()) {
-					data.admin_pin.reset();
-				}
+				debug[0] = (byte) 0x4E;
+				transients.setUserPinMode83(false);
 				return;
 
 			default:
+				debug[0] = (byte) 0x4F;
 				ISOException.throwIt(ISO7816.SW_WRONG_P1P2);
 				return;
 			}
 		}
 
+		debug[0] = (byte) 0x46;
 		ISOException.throwIt(ISO7816.SW_WRONG_P1P2);
 		return;
 	}
 
-	private final void processChangeReferenceData(final short lc, final byte p1, final byte p2) {
+	private final void processChangeReferenceData(final short lc, final byte p1, final byte p2, byte[] apduBuffer) {
 
 		sensitiveData();
 
@@ -646,76 +670,22 @@ public class ThothPGPApplet extends Applet {
 
 		switch (p2) {
 		case (byte) 0x81:
-			minlen = Constants.USER_PIN_MIN_SIZE;
-			if (data.keyDerivationIsActive()) {
-				minlen += data.keyDerivationSize();
-			} else {
-				minlen += Constants.USER_PIN_MIN_SIZE;
-			}
-			if (lc < minlen) {
-				ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-				return;
-			}
+			// Normal user login and change pin
 			transients.setUserPinMode81(false);
 			transients.setUserPinMode82(false);
-			off = data.user_pin_length;
-			if (!data.user_pin.check(transients.buffer, (short) 0, off)) {
+			if (!ThothPGPApplet.apishim.changeNormalUserPin(apduBuffer)) {
 				ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
 				return;
 			}
-			minlen = (byte) (lc - off);
-			if (data.keyDerivationIsActive()) {
-				if (data.keyDerivationSize() != minlen) {
-					ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-					return;
-				}
-			} else {
-				if ((minlen < Constants.USER_PIN_MIN_SIZE) || (minlen > Constants.USER_PIN_MAX_SIZE)) {
-					ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-					return;
-				}
-			}
-			JCSystem.beginTransaction();
-			data.user_pin_length = minlen;
-			data.user_pin.update(transients.buffer, off, data.user_pin_length);
-			JCSystem.commitTransaction();
-			data.user_pin.resetAndUnblock();
 			break;
 
 		case (byte) 0x83:
-			minlen = Constants.ADMIN_PIN_MIN_SIZE;
-			if (data.keyDerivationIsActive()) {
-				minlen += data.keyDerivationSize();
-			} else {
-				minlen += Constants.ADMIN_PIN_MIN_SIZE;
-			}
-			if (lc < minlen) {
-				ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-				return;
-			}
-			off = data.admin_pin_length;
-			if (!data.admin_pin.check(transients.buffer, (short) 0, off)) {
+			// Admin user login and change pin
+			transients.setUserPinMode83(false);
+			if (!ThothPGPApplet.apishim.changeAdminPin(apduBuffer)) {
 				ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
 				return;
 			}
-			minlen = (byte) (lc - off);
-			if (data.keyDerivationIsActive()) {
-				if (data.keyDerivationSize() != minlen) {
-					ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-					return;
-				}
-			} else {
-				if ((minlen < Constants.ADMIN_PIN_MIN_SIZE) || (minlen > Constants.ADMIN_PIN_MAX_SIZE)) {
-					ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-					return;
-				}
-			}
-			JCSystem.beginTransaction();
-			data.admin_pin_length = minlen;
-			data.admin_pin.update(transients.buffer, off, data.admin_pin_length);
-			JCSystem.commitTransaction();
-			data.admin_pin.resetAndUnblock();
-			data.admin_pin.check(transients.buffer, off, data.admin_pin_length);
 			break;
 
 		default:
@@ -724,7 +694,7 @@ public class ThothPGPApplet extends Applet {
 		}
 	}
 
-	private final void processResetRetryCounter(final short lc, final byte p1, final byte p2) {
+	private final void processResetRetryCounter(final short lc, final byte p1, final byte p2, byte[] apduBuffer) {
 
 		sensitiveData();
 
@@ -738,55 +708,27 @@ public class ThothPGPApplet extends Applet {
 
 		switch (p1) {
 		case (byte) 0x00:
-			minlen = Constants.USER_PUK_MIN_SIZE;
-			if (data.keyDerivationIsActive()) {
-				minlen += data.keyDerivationSize();
-			} else {
-				minlen += Constants.USER_PIN_MIN_SIZE;
-			}
-			if (lc < minlen) {
-				ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-				return;
-			}
+
 			transients.setUserPinMode81(false);
 			transients.setUserPinMode82(false);
-			off = data.user_puk_length;
-			if (!data.user_puk.check(transients.buffer, (short) 0, off)) {
+
+			// Login with PUK and reset normal user
+			if (!ThothPGPApplet.apishim.pukResetNormalUserPin(apduBuffer)) {
 				ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
 				return;
 			}
-			minlen = (byte) (lc - off);
-			if (data.keyDerivationIsActive()) {
-				if (data.keyDerivationSize() != minlen) {
-					ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-					return;
-				}
-			} else {
-				if ((minlen < Constants.USER_PIN_MIN_SIZE) || (minlen > Constants.USER_PIN_MAX_SIZE)) {
-					ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-					return;
-				}
-			}
-			JCSystem.beginTransaction();
-			data.user_pin_length = minlen;
-			data.user_pin.update(transients.buffer, off, data.user_pin_length);
-			JCSystem.commitTransaction();
-			data.user_pin.resetAndUnblock();
 			break;
 
 		case (byte) 0x02:
-			assertAdmin();
-			if ((lc < Constants.USER_PIN_MIN_SIZE) || (lc > Constants.USER_PIN_MAX_SIZE)) {
-				ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-				return;
-			}
+
 			transients.setUserPinMode81(false);
 			transients.setUserPinMode82(false);
-			JCSystem.beginTransaction();
-			data.user_pin_length = (byte) lc;
-			data.user_pin.update(transients.buffer, (short) 0, data.user_pin_length);
-			JCSystem.commitTransaction();
-			data.user_pin.resetAndUnblock();
+
+			// Login with admin from front panel and reset normal user
+			if (!ThothPGPApplet.apishim.adminResetNormalUserPin(apduBuffer)) {
+				ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
+				return;
+			}
 			break;
 
 		default:
@@ -795,7 +737,8 @@ public class ThothPGPApplet extends Applet {
 		}
 	}
 
-	private final void processPutData(final short lc, final byte p1, final byte p2, final boolean isOdd) {
+	private final void processPutData(final short lc, final byte p1, final byte p2, final boolean isOdd,
+			byte[] apduBuffer) {
 
 		sensitiveData();
 
@@ -805,86 +748,8 @@ public class ThothPGPApplet extends Applet {
 
 		if (isOdd) {
 
-			assertAdmin();
-
-			if ((p1 != (byte) 0x3f) || (p2 != (byte) 0xff)) {
-				ISOException.throwIt(ISO7816.SW_WRONG_P1P2);
-				return;
-			}
-			if (lc < 8) {
-				ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-				return;
-			}
-
-			if (buf[0] != (byte) 0x4D) {
-				ISOException.throwIt(ISO7816.SW_WRONG_DATA);
-				return;
-			}
-
-			final short len = Common.readLength(buf, (byte) 1, (short) (lc - 1));
-			short off = Common.skipLength(buf, (byte) 1, (short) (lc - 1));
-
-			if ((short) (off + len) != lc) {
-				ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-				return;
-			}
-
-			byte extended_expect = (byte) 0;
-
-			switch (buf[off]) {
-			case Constants.CRT_TAG_SIGNATURE_KEY:
-				k = data.pgp_keys[Persistent.PGP_KEYS_OFFSET_SIG];
-				JCSystem.beginTransaction();
-				Util.arrayFillNonAtomic(data.digital_signature_counter, (short) 0,
-						(byte) data.digital_signature_counter.length, (byte) 0);
-				JCSystem.commitTransaction();
-				extended_expect = (byte) 0x01;
-				break;
-
-			case Constants.CRT_TAG_DECRYPTION_KEY:
-				k = data.pgp_keys[Persistent.PGP_KEYS_OFFSET_DEC];
-				extended_expect = (byte) 0x02;
-				break;
-
-			case Constants.CRT_TAG_AUTHENTICATION_KEY:
-				k = data.pgp_keys[Persistent.PGP_KEYS_OFFSET_AUT];
-				extended_expect = (byte) 0x03;
-				break;
-
-			case Constants.CRT_TAG_SECURE_MESSAGING_KEY:
-				k = sm.static_key;
-				extended_expect = (byte) 0x04;
-				break;
-
-			default:
-				ISOException.throwIt(ISO7816.SW_WRONG_DATA);
-				return;
-			}
-
-			++off;
-
-			if (buf[off] == (byte) 0) {
-				++off;
-			} else if (buf[off] == (byte) 3) {
-				++off;
-				if (buf[off++] != (byte) 0x84) {
-					ISOException.throwIt(ISO7816.SW_WRONG_DATA);
-					return;
-				}
-				if (buf[off++] != (byte) 1) {
-					ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-					return;
-				}
-				if (buf[off++] != extended_expect) {
-					ISOException.throwIt(ISO7816.SW_WRONG_DATA);
-					return;
-				}
-			} else {
-				ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-				return;
-			}
-
-			k.importKey(ec, buf, off, (short) (lc - off));
+			// Key Import. Function not supported.
+			ISOException.throwIt(ISO7816.SW_FUNC_NOT_SUPPORTED);
 
 		} else {
 			final short tag = Util.makeShort(p1, p2);
@@ -1056,15 +921,22 @@ public class ThothPGPApplet extends Applet {
 				assertAdmin();
 				k = currentTagOccurenceToKey();
 				if (k == null) {
-					ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
+					debug[0] = (byte) 0x36;
+//					ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
+					ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x36));
 					return;
 				}
-				k.setCertificate(buf, (short) 0, lc);
+
+				apishim.clearCert(currentTagOccurenceToKeyInd());
+				if (!apishim.writeCert(currentTagOccurenceToKeyInd(), buf, (short) 0, (short) 0, lc)) {
+					ISOException.throwIt(ISO7816.SW_WARNING_STATE_UNCHANGED);
+				}
 				break;
 
 			case Constants.TAG_ALGORITHM_ATTRIBUTES_SIG:
 				assertAdmin();
-				data.pgp_keys[Persistent.PGP_KEYS_OFFSET_SIG].setAttributes(ec, buf, (short) 0, lc);
+				data.pgp_keys[Persistent.PGP_KEYS_OFFSET_SIG].setAttributes(ec, buf, (short) 0, lc,
+						Persistent.PGP_KEYS_OFFSET_SIG, apduBuffer);
 				JCSystem.beginTransaction();
 				Util.arrayFillNonAtomic(data.digital_signature_counter, (short) 0,
 						(byte) data.digital_signature_counter.length, (byte) 0);
@@ -1073,17 +945,19 @@ public class ThothPGPApplet extends Applet {
 
 			case Constants.TAG_ALGORITHM_ATTRIBUTES_DEC:
 				assertAdmin();
-				data.pgp_keys[Persistent.PGP_KEYS_OFFSET_DEC].setAttributes(ec, buf, (short) 0, lc);
+				data.pgp_keys[Persistent.PGP_KEYS_OFFSET_DEC].setAttributes(ec, buf, (short) 0, lc,
+						Persistent.PGP_KEYS_OFFSET_DEC, apduBuffer);
 				break;
 
 			case Constants.TAG_ALGORITHM_ATTRIBUTES_AUT:
 				assertAdmin();
-				data.pgp_keys[Persistent.PGP_KEYS_OFFSET_AUT].setAttributes(ec, buf, (short) 0, lc);
+				data.pgp_keys[Persistent.PGP_KEYS_OFFSET_AUT].setAttributes(ec, buf, (short) 0, lc,
+						Persistent.PGP_KEYS_OFFSET_AUT, apduBuffer);
 				break;
 
 			case Constants.TAG_ALGORITHM_ATTRIBUTES_SM:
 				assertAdmin();
-				sm.static_key.setAttributes(ec, buf, (short) 0, lc);
+				sm.static_key.setAttributes(ec, buf, (short) 0, lc, (byte) 0xFF, apduBuffer);
 				break;
 
 			case Constants.TAG_PW_STATUS:
@@ -1130,31 +1004,31 @@ public class ThothPGPApplet extends Applet {
 				break;
 
 			case Constants.TAG_GENERATION_DATE_SIG:
-				assertAdmin();
-				data.pgp_keys[Persistent.PGP_KEYS_OFFSET_SIG].setGenerationDate(buf, (short) 0, lc);
+				// Does nothing as the generation date is dependent on T101 KeyManager
 				break;
 
 			case Constants.TAG_GENERATION_DATE_DEC:
-				assertAdmin();
-				data.pgp_keys[Persistent.PGP_KEYS_OFFSET_DEC].setGenerationDate(buf, (short) 0, lc);
+				// Does nothing as the generation date is dependent on T101 KeyManager
 				break;
 
 			case Constants.TAG_GENERATION_DATE_AUT:
-				assertAdmin();
-				data.pgp_keys[Persistent.PGP_KEYS_OFFSET_AUT].setGenerationDate(buf, (short) 0, lc);
+				// Does nothing as the generation date is dependent on T101 KeyManager
 				break;
 
 			case Constants.TAG_RESETTING_CODE:
-				assertAdmin();
-				if ((lc < Constants.USER_PUK_MIN_SIZE) || (lc > Constants.USER_PUK_MAX_SIZE)) {
-					ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+				// Does not rely on checking if admin has been logged in. Requires admin to
+				// authenticate again if needed to change default PUK pin.
+				transients.setUserPinMode83(false);
+				if (ThothPGPApplet.apishim.loginAdminUserAndGetTries(apduBuffer) == (short) -1) {
+					ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
 					return;
 				}
-				JCSystem.beginTransaction();
-				data.user_puk_length = (byte) lc;
-				data.user_puk.update(buf, (short) 0, data.user_puk_length);
-				JCSystem.commitTransaction();
-				data.user_puk.resetAndUnblock();
+				transients.setUserPinMode83(true);
+				if (!ThothPGPApplet.apishim.pukChangePUKPinPin(apduBuffer)) {
+					ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
+					return;
+				}
+
 				break;
 
 			case Constants.TAG_KEY_DERIVATION_FUNCTION:
@@ -1175,18 +1049,26 @@ public class ThothPGPApplet extends Applet {
 
 			case Constants.TAG_SECURE_MESSAGING_CERTIFICATE:
 				assertAdmin();
-				k = sm.static_key;
-				k.setCertificate(buf, (short) 0, lc);
+				apishim.clearCert((byte) 0xFF);
+				if (!apishim.writeCert((byte) 0xFF, buf, (short) 0, (short) 0, lc)) {
+					ISOException.throwIt(ISO7816.SW_WARNING_STATE_UNCHANGED);
+				}
+
 				break;
 
 			default:
-				ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
+				debug[0] = (byte) 0x37;
+//				ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
+				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x37));
 				return;
 			}
 		}
 	}
 
-	private final short processGenerateAsymmetricKeyPair(final short lc, final byte p1, final byte p2) {
+	private final short processGenerateAsymmetricKeyPair(final short lc, final byte p1, final byte p2,
+			byte[] apduBuffer) {
+		
+		debug[1] = (byte) 0xFF;
 
 		final byte[] buf = transients.buffer;
 
@@ -1201,28 +1083,28 @@ public class ThothPGPApplet extends Applet {
 		}
 
 		boolean do_reset = false;
+		byte pkeyInd = (byte) 0xFF;
 		PGPKey pkey;
 		byte extended_expect = (byte) 0;
 
 		switch (buf[0]) {
 		case Constants.CRT_TAG_SIGNATURE_KEY:
 			do_reset = true;
-			pkey = data.pgp_keys[Persistent.PGP_KEYS_OFFSET_SIG];
+			pkeyInd = Persistent.PGP_KEYS_OFFSET_SIG;
 			extended_expect = (byte) 0x01;
 			break;
 
 		case Constants.CRT_TAG_DECRYPTION_KEY:
-			pkey = data.pgp_keys[Persistent.PGP_KEYS_OFFSET_DEC];
+			pkeyInd = Persistent.PGP_KEYS_OFFSET_DEC;
 			extended_expect = (byte) 0x02;
 			break;
 
 		case Constants.CRT_TAG_AUTHENTICATION_KEY:
-			pkey = data.pgp_keys[Persistent.PGP_KEYS_OFFSET_AUT];
+			pkeyInd = Persistent.PGP_KEYS_OFFSET_AUT;
 			extended_expect = (byte) 0x03;
 			break;
 
 		case Constants.CRT_TAG_SECURE_MESSAGING_KEY:
-			pkey = sm.static_key;
 			extended_expect = (byte) 0x04;
 			break;
 
@@ -1250,11 +1132,17 @@ public class ThothPGPApplet extends Applet {
 			return 0;
 		}
 
+		if (pkeyInd != (byte) 0xFF) {
+			pkey = data.pgp_keys[pkeyInd];
+		} else {
+			pkey = sm.static_key;
+		}
+
 		if (p1 == (byte) 0x80) {
 
 			assertAdmin();
-
-			pkey.generate(ec);
+			
+			pkey.generate(ec, pkeyInd, apishim.defaultExpiryTime, (short) 0, apduBuffer);
 
 			if (do_reset) {
 				JCSystem.beginTransaction();
@@ -1262,12 +1150,14 @@ public class ThothPGPApplet extends Applet {
 						(byte) data.digital_signature_counter.length, (byte) 0);
 				JCSystem.commitTransaction();
 			}
+			
 		}
 
-		return pkey.writePublicKeyDo(buf, (short) 0);
+		return pkey.getPublicKeyDo(pkeyInd, buf, (short) 0, apduBuffer);
 	}
 
-	private final short processPerformSecurityOperation(final short lc, final byte p1, final byte p2) {
+	private final short processPerformSecurityOperation(final short lc, final byte p1, final byte p2,
+			byte[] apduBuffer) {
 
 		sensitiveData();
 
@@ -1296,7 +1186,8 @@ public class ThothPGPApplet extends Applet {
 			}
 			JCSystem.commitTransaction();
 
-			return data.pgp_keys[Persistent.PGP_KEYS_OFFSET_SIG].sign(transients.buffer, lc, false);
+			return data.pgp_keys[Persistent.PGP_KEYS_OFFSET_SIG].sign(Persistent.PGP_KEYS_OFFSET_SIG, transients.buffer,
+					lc, false, apduBuffer);
 		}
 
 		/* PSO : DECIPHER */
@@ -1333,7 +1224,8 @@ public class ThothPGPApplet extends Applet {
 				return res;
 			}
 
-			return data.pgp_keys[Persistent.PGP_KEYS_OFFSET_DEC].decipher(ec, transients.buffer, lc);
+			return data.pgp_keys[Persistent.PGP_KEYS_OFFSET_DEC].decipher(Persistent.PGP_KEYS_OFFSET_DEC, ec,
+					transients.buffer, lc, apduBuffer);
 		}
 
 		/* PSO : ENCIPHER */
@@ -1368,17 +1260,18 @@ public class ThothPGPApplet extends Applet {
 		return 0;
 	}
 
-	private final short processInternalAuthenticate(final short lc, final byte p1, final byte p2) {
+	private final short processInternalAuthenticate(final short lc, final byte p1, final byte p2, byte[] apduBuffer) {
 
 		if (p2 == (byte) 0x00) {
 			switch (p1) {
 			case (byte) 0x00:
 				sensitiveData();
 				assertUserMode82();
-				return data.pgp_keys[Persistent.PGP_KEYS_OFFSET_AUT].sign(transients.buffer, lc, true);
+				return data.pgp_keys[Persistent.PGP_KEYS_OFFSET_AUT].sign(Persistent.PGP_KEYS_OFFSET_AUT,
+						transients.buffer, lc, true, apduBuffer);
 
 			case (byte) 0x01:
-				return sm.establish(transients, ec, transients.buffer, lc);
+				return sm.establish(transients, ec, transients.buffer, lc, apduBuffer);
 			}
 		}
 
@@ -1408,24 +1301,33 @@ public class ThothPGPApplet extends Applet {
 		return le;
 	}
 
-	private final void processTerminateDf(final byte p1, final byte p2) {
+	private final void processTerminateDf(final byte p1, final byte p2, byte[] apduBuffer) {
 
 		if ((p1 != (byte) 0) || (p2 != (byte) 0)) {
 			ISOException.throwIt(ISO7816.SW_WRONG_P1P2);
 			return;
 		}
 
-		if (data.admin_pin.getTriesRemaining() <= 0) {
-			data.isTerminated = true;
-			return;
+		// Bypass admin authentication and use front panel to confirm terminate card to
+		// prevent accidental termination
+		boolean toTerminate = true;
+
+		try {
+			if (!ThothPGPApplet.apishim.confirmationUI(APIShim.TXT_RESET_CARD_TITLE, (short) 0,
+					(short) APIShim.TXT_RESET_CARD_TITLE.length, APIShim.TXT_RESET_CARD, (short) 0,
+					(short) APIShim.TXT_RESET_CARD.length, apduBuffer)) {
+				toTerminate = false;
+			}
+		} catch (Exception e) {
+			// Do nothing and proceed to terminate
 		}
 
-		assertAdmin();
-
-		data.isTerminated = true;
+		if (toTerminate) {
+			data.isTerminated = true;
+		}
+		return;
 	}
 
-	@SuppressWarnings("fallthrough")
 	private final void processActivateFile(final byte p1, final byte p2) {
 		if (p1 != (byte) 0) {
 			ISOException.throwIt(ISO7816.SW_WRONG_P1P2);
@@ -1434,11 +1336,10 @@ public class ThothPGPApplet extends Applet {
 
 		if (data.isTerminated) {
 			switch (p2) {
-			case (byte) 1:
-				sm.reset(false, transients);
-				// missing break is intentional
-
 			case (byte) 0:
+				// According to Version 3.3 standards, ACTIVATE_FILE is used to reset ALL KEYS
+				// !!!
+				sm.reset(false, transients);
 				transients.clear();
 				data.reset(false);
 				break;
@@ -1451,19 +1352,16 @@ public class ThothPGPApplet extends Applet {
 	}
 
 	private final void clearConnection() {
-		data.user_pin.reset();
-		data.user_puk.reset();
-		data.admin_pin.reset();
 		transients.clear();
 		sm.clearSession(transients);
 	}
 
 	public final void process(final APDU apdu) {
-
 		final byte[] apdubuf = apdu.getBuffer();
 
 		if (apdu.isISOInterindustryCLA() && selectingApplet()) {
 
+			initAPI(apdubuf);
 			clearConnection();
 
 			if (data.isTerminated) {
@@ -1495,6 +1393,34 @@ public class ThothPGPApplet extends Applet {
 
 		short available_le = 0;
 		short sw = (short) 0x9000;
+
+		// For testing if APIs have been successfully established
+		if (apdubuf[ISO7816.OFFSET_CLA] == (byte) 0xB0 && apdubuf[ISO7816.OFFSET_INS] == (byte) 0x00) {
+//			if (api == null) {
+//				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x61));
+//			}
+//			if (csapi == null) {
+//				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x62));
+//			}
+//			if (apishim == null) {
+//				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x63));
+//			}
+//			ISOException.throwIt(Util.makeShort(debug[0], debug[1]));
+//			return;
+			if (data.pgp_keys[(short) 0].is_initialized) {
+				debug[2] = (byte) 0xFF;
+			}
+			if (data.pgp_keys[(short) 1].is_initialized) {
+				debug[3] = (byte) 0xFF;
+			}
+			if (data.pgp_keys[(short) 2].is_initialized) {
+				debug[4] = (byte) 0xFF;
+			}
+			apdu.setOutgoing();
+			apdu.setOutgoingLength((short) 5);
+			apdu.sendBytesLong(debug, (short) 0, (short) 5);
+			return;
+		}
 
 		if (((apdubuf[ISO7816.OFFSET_CLA] & Constants.CLA_MASK_CHAINING) != Constants.CLA_MASK_CHAINING)
 				&& (apdubuf[ISO7816.OFFSET_INS] == Constants.INS_GET_RESPONSE)) {
@@ -1552,72 +1478,90 @@ public class ThothPGPApplet extends Applet {
 				clearConnection();
 			}
 
+			apdu.waitExtension();
+
 			try {
 
-				switch (apdubuf[ISO7816.OFFSET_INS]) {
-				case Constants.INS_SELECT_DATA:
-					processSelectData(lc, p1, p2);
-					break;
+			switch (apdubuf[ISO7816.OFFSET_INS]) {
+			case Constants.INS_SELECT_DATA:
+				debug[0] = (byte) 0x01;
+				processSelectData(lc, p1, p2);
+				break;
 
-				case Constants.INS_GET_DATA:
-					available_le = processGetData(p1, p2);
-					break;
+			case Constants.INS_GET_DATA:
+				debug[0] = (byte) 0x02;
+				available_le = processGetData(p1, p2, apdubuf);
+				break;
 
-				case Constants.INS_GET_NEXT_DATA:
-					available_le = processGetNextData(p1, p2);
-					break;
+			case Constants.INS_GET_NEXT_DATA:
+				debug[0] = (byte) 0x03;
+				available_le = processGetNextData(p1, p2);
+				break;
 
-				case Constants.INS_VERIFY:
-					processVerify(lc, p1, p2);
-					break;
+			case Constants.INS_VERIFY:
+				debug[0] = (byte) 0x04;
+				processVerify(lc, p1, p2, apdubuf);
+				break;
 
-				case Constants.INS_CHANGE_REFERENCE_DATA:
-					processChangeReferenceData(lc, p1, p2);
-					break;
+			case Constants.INS_CHANGE_REFERENCE_DATA:
+				debug[0] = (byte) 0x05;
+				processChangeReferenceData(lc, p1, p2, apdubuf);
+				break;
 
-				case Constants.INS_RESET_RETRY_COUNTER:
-					processResetRetryCounter(lc, p1, p2);
-					break;
+			case Constants.INS_RESET_RETRY_COUNTER:
+				debug[0] = (byte) 0x06;
+				processResetRetryCounter(lc, p1, p2, apdubuf);
+				break;
 
-				case Constants.INS_PUT_DATA_DA:
-					processPutData(lc, p1, p2, false);
-					break;
+			case Constants.INS_PUT_DATA_DA:
+				debug[0] = (byte) 0x07;
+				processPutData(lc, p1, p2, false, apdubuf);
+				break;
 
-				case Constants.INS_PUT_DATA_DB:
-					processPutData(lc, p1, p2, true);
-					break;
+			case Constants.INS_PUT_DATA_DB:
+				debug[0] = (byte) 0x08;
+				processPutData(lc, p1, p2, true, apdubuf);
+				break;
 
-				case Constants.INS_GENERATE_ASYMMETRIC_KEY_PAIR:
-					available_le = processGenerateAsymmetricKeyPair(lc, p1, p2);
-					break;
+			case Constants.INS_GENERATE_ASYMMETRIC_KEY_PAIR:
+				debug[0] = (byte) 0x09;
+				available_le = processGenerateAsymmetricKeyPair(lc, p1, p2, apdubuf);
+				break;
 
-				case Constants.INS_PERFORM_SECURITY_OPERATION:
-					available_le = processPerformSecurityOperation(lc, p1, p2);
-					break;
+			case Constants.INS_PERFORM_SECURITY_OPERATION:
+				debug[0] = (byte) 0x0A;
+				available_le = processPerformSecurityOperation(lc, p1, p2, apdubuf);
+				break;
 
-				case Constants.INS_INTERNAL_AUTHENTICATE:
-					available_le = processInternalAuthenticate(lc, p1, p2);
-					break;
+			case Constants.INS_INTERNAL_AUTHENTICATE:
+				debug[0] = (byte) 0x0B;
+				available_le = processInternalAuthenticate(lc, p1, p2, apdubuf);
+				break;
 
-				case Constants.INS_GET_CHALLENGE:
-					available_le = processGetChallenge(apdu.setOutgoing(), p1, p2);
-					break;
+			case Constants.INS_GET_CHALLENGE:
+				debug[0] = (byte) 0x0C;
+				available_le = processGetChallenge(apdu.setOutgoing(), p1, p2);
+				break;
 
-				case Constants.INS_TERMINATE_DF:
-					processTerminateDf(p1, p2);
-					break;
+			case Constants.INS_TERMINATE_DF:
+				debug[0] = (byte) 0x0D;
+				processTerminateDf(p1, p2, apdubuf);
+				break;
 
-				case Constants.INS_ACTIVATE_FILE:
-					processActivateFile(p1, p2);
-					break;
+			case Constants.INS_ACTIVATE_FILE:
+				debug[0] = (byte) 0x0E;
+				processActivateFile(p1, p2);
+				apishim.initEnv(apdubuf);
+				break;
 
-				default:
-					ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
-					return;
-				}
+			default:
+				debug[0] = (byte) 0x0F;
+				ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+				return;
+			}
 
-			} catch (ISOException e) {
-				sw = e.getReason();
+			} catch (ISOException e) {					
+				sw = e.getReason();				
 			}
 
 			if (transients.secureMessagingOk()) {
@@ -1648,8 +1592,8 @@ public class ThothPGPApplet extends Applet {
 				}
 			}
 
-			if (resp_le > Constants.APDU_MAX_LENGTH) {
-				resp_le = Constants.APDU_MAX_LENGTH;
+			if (resp_le > (short) 256) {
+				resp_le = (short) 256;
 			}
 
 			short off = transients.outputStart();
@@ -1681,8 +1625,14 @@ public class ThothPGPApplet extends Applet {
 				transients.setOutputStart((short) 0);
 			}
 		}
-
+		
+//		shortToBytes(sw, debug, (short) 0);
 		ISOException.throwIt(sw);
+	}
+
+	public static void shortToBytes(short s, byte[] b, short offset) {
+		b[offset] = (byte) ((s >> 8) & 0xFF);
+		b[(short) (offset + 1)] = (byte) (s & 0xFF);
 	}
 
 }

@@ -11,444 +11,389 @@ import javacard.framework.*;
 import javacard.security.*;
 import javacardx.crypto.*;
 
-public final class SecureMessaging {
-
-    public static final short MAC_LENGTH = (short)(Constants.AES_BLOCK_SIZE / (short)2);
-
-    protected static final byte[] PADDING_BLOCK = {
-        (byte)0x80, (byte)0x00, (byte)0x00, (byte)0x00,
-        (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
-        (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00,
-        (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00
-    };
-
-    private static final byte[] CRT_PREFIX = {
-        (byte)0xA6, (byte)0x0D,
-        (byte)0x90, (byte)0x02, (byte)0x11, (byte)0x00,
-        (byte)0x95, (byte)0x01, (byte)0x3C,
-        (byte)0x80, (byte)0x01, (byte)0x88,
-        (byte)0x81, (byte)0x01
-    };
-
-    private final MessageDigest digest;
-    private final KeyAgreement key_agreement;
-
-    protected final PGPKey static_key;
-
-    private final Cipher cipher;
-    private AESKey senc;
-    private final byte[] iv;
-
-    private final CmacSignature macer;
-    private final byte[] mac_chaining;
-    private CmacKey sreceiptmac;
-    private CmacKey smac;
-    private CmacKey srmac;
-
-
-    protected SecureMessaging(final Transients transients) {
-        digest = MessageDigest.getInstance(MessageDigest.ALG_SHA_256, false);
-        key_agreement = KeyAgreement.getInstance(KeyAgreement.ALG_EC_SVDP_DH_PLAIN, false);
-
-        static_key = new PGPKey(true);
-
-        cipher = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
-        senc = null;
-        iv = JCSystem.makeTransientByteArray(Constants.AES_BLOCK_SIZE,
-                                             JCSystem.CLEAR_ON_DESELECT);
-
-        macer = new CmacSignature();
-        mac_chaining = JCSystem.makeTransientByteArray(Constants.AES_BLOCK_SIZE,
-                                                       JCSystem.CLEAR_ON_DESELECT);
-        sreceiptmac = null;
-        smac = null;
-        srmac = null;
-
-        reset(true, transients);
-    }
-
-
-    protected final void clearSession(final Transients transients) {
-        if((senc != null) && senc.isInitialized()) {
-            senc.clearKey();
-        }
-        Util.arrayFillNonAtomic(iv, (short)0, (short)iv.length, (byte)0);
-
-        macer.clear();
-        Util.arrayFillNonAtomic(mac_chaining, (short)0, (short)mac_chaining.length, (byte)0);
-        if((sreceiptmac != null) && senc.isInitialized()) {
-            sreceiptmac.clearKey();
-        }
-        if((smac != null) && smac.isInitialized()) {
-            smac.clearKey();
-        }
-        if((srmac != null) && srmac.isInitialized()) {
-            srmac.clearKey();
-        }
-
-        transients.setSecureMessagingEncryptionCounter((short)0);
-    }
-
-    protected final void reset(final boolean isRegistering, final Transients transients) {
-        clearSession(transients);
-        sreceiptmac = null;
-        senc = null;
-        smac = null;
-        srmac = null;
-        static_key.reset(isRegistering);
-    }
-
-    private final void initSession(final short keyLength,
-                                   final byte[] buf, final short off) {
-        if((sreceiptmac == null) ||
-           (sreceiptmac.getSize() != (short)(keyLength * 8))) {
-            senc = (AESKey)KeyBuilder.buildKey(KeyBuilder.TYPE_AES_TRANSIENT_DESELECT,
-                                               (short)(keyLength * 8),
-                                               false);
-
-            sreceiptmac = new CmacKey(keyLength);
-            smac = new CmacKey(keyLength);
-            srmac = new CmacKey(keyLength);
-        }
-
-        sreceiptmac.setKey(buf, off);
-        senc.setKey(buf, (short)(off + keyLength));
-        smac.setKey(buf, (short)(off + (short)(2 * keyLength)));
-        srmac.setKey(buf, (short)(off + (short)(3 * keyLength)));
-    }
-
-    protected final boolean isInitialized() {
-        return static_key.isInitialized();
-    }
-
-    protected final boolean isSessionAvailable() {
-        return isInitialized()
-            && (senc != null) && senc.isInitialized()
-            && (smac != null) && smac.isInitialized()
-            && (srmac != null) && srmac.isInitialized();
-    }
+public class SecureMessaging {
+
+	public static short MAC_LENGTH = (short) (Constants.AES_BLOCK_SIZE / (short) 2);
+
+	protected static byte[] PADDING_BLOCK = { (byte) 0x80, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+			(byte) 0x00, (byte) 0x00, (byte) 0x00 };
+
+	private static byte[] CRT_PREFIX = { (byte) 0xA6, (byte) 0x0D, (byte) 0x90, (byte) 0x02, (byte) 0x11, (byte) 0x00,
+			(byte) 0x95, (byte) 0x01, (byte) 0x3C, (byte) 0x80, (byte) 0x01, (byte) 0x88, (byte) 0x81, (byte) 0x01 };
+
+	private MessageDigest digest = null;
+	private KeyAgreement key_agreement = null;
+
+	protected PGPKey static_key = null;
+
+	private AESKey senc = null;
+	private byte[] iv = null;
+
+	private CmacSignature macer = null;
+	private byte[] mac_chaining = null;
+	private CmacKey sreceiptmac = null;
+	private CmacKey smac = null;
+	private CmacKey srmac = null;
+
+	protected SecureMessaging(Transients transients) {
+		digest = MessageDigest.getInstance(MessageDigest.ALG_SHA_256, false);
+		key_agreement = KeyAgreement.getInstance(KeyAgreement.ALG_EC_SVDP_DH_PLAIN, false);
+
+		static_key = new PGPKey((byte) 0xFF, true);
+
+		iv = JCSystem.makeTransientByteArray(Constants.AES_BLOCK_SIZE, JCSystem.CLEAR_ON_RESET);
+
+		macer = new CmacSignature();
+		mac_chaining = JCSystem.makeTransientByteArray(Constants.AES_BLOCK_SIZE, JCSystem.CLEAR_ON_RESET);
+
+		reset(true, transients);
+	}
+
+	protected void clearSession(Transients transients) {
+		if ((senc != null) && senc.isInitialized()) {
+			senc.clearKey();
+		}
+		Util.arrayFillNonAtomic(iv, (short) 0, (short) iv.length, (byte) 0);
 
-
-    private final short scp11b(final ECCurves curves,
-                               final byte[] buf, final short len) {
+		macer.clear();
+		Util.arrayFillNonAtomic(mac_chaining, (short) 0, (short) mac_chaining.length, (byte) 0);
+		if ((sreceiptmac != null) && senc.isInitialized()) {
+			sreceiptmac.clearKey();
+		}
+		if ((smac != null) && smac.isInitialized()) {
+			smac.clearKey();
+		}
+		if ((srmac != null) && srmac.isInitialized()) {
+			srmac.clearKey();
+		}
 
-        final ECParams params = static_key.ecParams(curves);
+		transients.setSecureMessagingEncryptionCounter((short) 0);
+	}
 
-        if(len <= (short)((short)CRT_PREFIX.length + 4)) {
-            ISOException.throwIt(ISO7816.SW_WRONG_DATA);
-            return 0;
-        }
+	protected void reset(boolean isRegistering, Transients transients) {
+		clearSession(transients);
+		sreceiptmac = null;
+		senc = null;
+		smac = null;
+		srmac = null;
+		static_key.reset((byte) 0xFF, isRegistering);
+	}
 
-        if(Util.arrayCompare(CRT_PREFIX, (short)0,
-                             buf, (short)0,
-                             (short)CRT_PREFIX.length) != (byte)0) {
-            ISOException.throwIt(ISO7816.SW_WRONG_DATA);
-            return 0;
-        }
+	private void initSession(short keyLength, byte[] buf, short off) {
+		if ((sreceiptmac == null) || (sreceiptmac.getSize() != (short) (keyLength * 8))) {
+			senc = (AESKey) KeyBuilder.buildKey(KeyBuilder.TYPE_AES_TRANSIENT_DESELECT, (short) (keyLength * 8), false);
 
-        short off = (short)CRT_PREFIX.length;
+			sreceiptmac = new CmacKey(keyLength);
+			smac = new CmacKey(keyLength);
+			srmac = new CmacKey(keyLength);
+		}
 
-        if(buf[off] != Common.aesKeyLength(params)) {
-            ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
-            return 0;
-        }
-        ++off;
+		sreceiptmac.setKey(buf, off);
+		senc.setKey(buf, (short) (off + keyLength));
+		smac.setKey(buf, (short) (off + (short) (2 * keyLength)));
+		srmac.setKey(buf, (short) (off + (short) (3 * keyLength)));
+	}
 
-        if(Util.getShort(buf, off) != (short)0x5F49) {
-            ISOException.throwIt(ISO7816.SW_WRONG_DATA);
-            return 0;
-        }
-        off += 2;
+	protected boolean isInitialized() {
+		return static_key.is_initialized;
+	}
 
-        short keylen = Common.readLength(buf, off, len);
+	protected boolean isSessionAvailable() {
+		return isInitialized() && (senc != null) && senc.isInitialized() && (smac != null) && smac.isInitialized()
+				&& (srmac != null) && srmac.isInitialized();
+	}
 
-        off = Common.skipLength(buf, off, len);
+	private short scp11b(ECCurves curves, byte[] buf, short len, byte[] apduBuffer) {
 
-        if((short)(off + keylen) > len) {
-            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-            return 0;
-        }
+		ECParams params = static_key.ecParams(curves);
 
-        if(keylen != (short)(2 * Common.bitsToBytes(params.nb_bits) + 1)) {
-            ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-            return 0;
-        }
+		if (len <= (short) ((short) CRT_PREFIX.length + 4)) {
+			ISOException.throwIt(ISO7816.SW_WRONG_DATA);
+			return 0;
+		}
 
-        ECPrivateKey eskcard = (ECPrivateKey)KeyBuilder.buildKey(KeyBuilder.TYPE_EC_FP_PRIVATE,
-                                                                 params.nb_bits,
-                                                                 false);
-        ECPublicKey epkcard = (ECPublicKey)KeyBuilder.buildKey(KeyBuilder.TYPE_EC_FP_PUBLIC,
-                                                               params.nb_bits,
-                                                               false);
+		if (Util.arrayCompare(CRT_PREFIX, (short) 0, buf, (short) 0, (short) CRT_PREFIX.length) != (byte) 0) {
+			ISOException.throwIt(ISO7816.SW_WRONG_DATA);
+			return 0;
+		}
 
-        params.setParams(eskcard);
-        params.setParams(epkcard);
+		short off = (short) CRT_PREFIX.length;
 
-        KeyPair ekcard = new KeyPair(epkcard, eskcard);
+		if (buf[off] != Common.aesKeyLength(params)) {
+			ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
+			return 0;
+		}
+		++off;
 
-        ekcard.genKeyPair();
+		if (Util.getShort(buf, off) != (short) 0x5F49) {
+			ISOException.throwIt(ISO7816.SW_WRONG_DATA);
+			return 0;
+		}
+		off += 2;
 
-        if(!eskcard.isInitialized() ||
-           !epkcard.isInitialized()) {
-            ISOException.throwIt(Constants.SW_MEMORY_FAILURE);
-            return 0;
-        }
+		short keylen = Common.readLength(buf, off, len);
 
-        key_agreement.init(eskcard);
+		off = Common.skipLength(buf, off, len);
 
-        short msglen = 0;
+		if ((short) (off + keylen) > len) {
+			ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+			return 0;
+		}
 
-        msglen += key_agreement.generateSecret(buf, off, keylen, buf, len);
-        eskcard.clearKey();
-        eskcard = null;
+		if (keylen != (short) (2 * Common.bitsToBytes(params.nb_bits) + 1)) {
+			ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+			return 0;
+		}
 
-        static_key.initKeyAgreement(key_agreement);
-        msglen += key_agreement.generateSecret(buf, off, keylen, buf, (short)(len + msglen));
+		ECPrivateKey eskcard = (ECPrivateKey) KeyBuilder.buildKey(KeyBuilder.TYPE_EC_FP_PRIVATE, params.nb_bits, false);
+		ECPublicKey epkcard = (ECPublicKey) KeyBuilder.buildKey(KeyBuilder.TYPE_EC_FP_PUBLIC, params.nb_bits, false);
 
-        Util.setShort(buf, (short)(len + msglen), (short)0);
-        msglen += 2;
+		params.setParams(eskcard, params.nb_bits);
+		params.setParams(epkcard, params.nb_bits);
 
-        short counter = 1;
-        off = (short)(len + msglen);
-        msglen += 2;
+		KeyPair ekcard = new KeyPair(epkcard, eskcard);
 
-        buf[(short)(len + msglen)] = CRT_PREFIX[(short)8];
-        ++msglen;
-        buf[(short)(len + msglen)] = CRT_PREFIX[(short)11];
-        ++msglen;
-        buf[(short)(len + msglen)] = buf[CRT_PREFIX.length];
-        ++msglen;
+		ekcard.genKeyPair();
 
-        keylen = 0;
+		if (!eskcard.isInitialized() || !epkcard.isInitialized()) {
+			ISOException.throwIt(Constants.SW_MEMORY_FAILURE);
+			return 0;
+		}
 
-        while(keylen < (short)(4 * buf[CRT_PREFIX.length])) {
-            Util.setShort(buf, off, counter);
-            ++counter;
+		key_agreement.init(eskcard);
 
-            keylen += digest.doFinal(buf, len, msglen,
-                                     buf, (short)(len + msglen + keylen));
-        }
+		short msglen = 0;
 
-        initSession(Common.aesKeyLength(params), buf, (short)(len + msglen));
+		msglen += key_agreement.generateSecret(buf, off, keylen, buf, len);
+		eskcard.clearKey();
+		eskcard = null;
 
-        Util.arrayFillNonAtomic(buf, len, (short)(msglen + keylen), (byte)0);
+		short sslen = ThothPGPApplet.apishim.ecdh((byte) 0xFF, buf, off, keylen, apduBuffer);
 
-        off = len;
-        Util.setShort(buf, off, (short)0x5F49);
-        off += 2;
-        off = Common.writeLength(buf, off, (short)(2 * Common.bitsToBytes(params.nb_bits) + 1));
-        off += epkcard.getW(buf, off);
-        msglen = off;
+		if (sslen == (short) -1) {
+			ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
+		}
+		Util.arrayCopyNonAtomic(apduBuffer, (short) 0, buf, (short) (len + msglen), sslen);
+		msglen += sslen;
 
-        epkcard.clearKey();
-        epkcard = null;
+		Util.setShort(buf, (short) (len + msglen), (short) 0);
+		msglen += 2;
 
-        ekcard = null;
+		short counter = 1;
+		off = (short) (len + msglen);
+		msglen += 2;
 
-        buf[off++] = (byte)0x86;
-        buf[off++] = (byte)Constants.AES_BLOCK_SIZE;
+		buf[(short) (len + msglen)] = CRT_PREFIX[(short) 8];
+		++msglen;
+		buf[(short) (len + msglen)] = CRT_PREFIX[(short) 11];
+		++msglen;
+		buf[(short) (len + msglen)] = buf[CRT_PREFIX.length];
+		++msglen;
 
-        macer.init(sreceiptmac);
-        macer.sign(buf, (short)0, msglen,
-                   buf, off, Constants.AES_BLOCK_SIZE);
-        macer.clear();
+		keylen = 0;
 
-        Util.arrayCopy(buf, off, mac_chaining, (short)0, Constants.AES_BLOCK_SIZE);
+		while (keylen < (short) (4 * buf[CRT_PREFIX.length])) {
+			Util.setShort(buf, off, counter);
+			++counter;
 
-        off += Constants.AES_BLOCK_SIZE;
+			keylen += digest.doFinal(buf, len, msglen, buf, (short) (len + msglen + keylen));
+		}
 
-        msglen = (short)(off - len);
+		initSession(Common.aesKeyLength(params), buf, (short) (len + msglen));
 
-        Util.arrayCopy(buf, len, buf, (short)0, msglen);
+		Util.arrayFillNonAtomic(buf, len, (short) (msglen + keylen), (byte) 0);
 
-        return msglen;
-    }
+		off = len;
+		Util.setShort(buf, off, (short) 0x5F49);
+		off += 2;
+		off = Common.writeLength(buf, off, (short) (2 * Common.bitsToBytes(params.nb_bits) + 1));
+		off += epkcard.getW(buf, off);
+		msglen = off;
 
+		epkcard.clearKey();
+		epkcard = null;
 
-    protected final short establish(final Transients transients,
-                                    final ECCurves ec,
-                                    final byte[] buf, final short len) {
+		ekcard = null;
 
-        clearSession(transients);
+		buf[off++] = (byte) 0x86;
+		buf[off++] = (byte) Constants.AES_BLOCK_SIZE;
 
-        if(isInitialized() && static_key.isEc()) {
-            return scp11b(ec, buf, len);
-        }
+		macer.init(sreceiptmac);
+		macer.sign(buf, (short) 0, msglen, buf, off, Constants.AES_BLOCK_SIZE);
+		macer.clear();
 
-        ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
-        return 0;
-    }
+		Util.arrayCopy(buf, off, mac_chaining, (short) 0, Constants.AES_BLOCK_SIZE);
 
+		off += Constants.AES_BLOCK_SIZE;
 
+		msglen = (short) (off - len);
 
-    private final void incrementEncryptionCounter(final Transients transients) {
-        final short pval = transients.secureMessagingEncryptionCounter();
-        final short nval = (short)(pval + 1);
+		Util.arrayCopy(buf, len, buf, (short) 0, msglen);
 
-        if(nval <= pval) {
-            clearSession(transients);
-            ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
-            return;
-        }
+		return msglen;
+	}
 
-        transients.setSecureMessagingEncryptionCounter(nval);
-    }
+	protected short establish(Transients transients, ECCurves ec, byte[] buf, short len, byte[] apduBuffer) {
 
+		clearSession(transients);
 
+		if (isInitialized() && static_key.isEc()) {
+			return scp11b(ec, buf, len, apduBuffer);
+		}
 
-    protected final short verifyAndDecryptCommand(final Transients transients,
-                                                  short dataLen, short dataWithHeaderLen) {
+		ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
+		return 0;
+	}
 
-        if(!isSessionAvailable()) {
-            ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
-            return 0;
-        }
+	private void incrementEncryptionCounter(Transients transients) {
+		short pval = transients.secureMessagingEncryptionCounter();
+		short nval = (short) (pval + 1);
 
-        incrementEncryptionCounter(transients);
+		if (nval <= pval) {
+			clearSession(transients);
+			ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
+			return;
+		}
 
-        if(dataLen < MAC_LENGTH) {
-            clearSession(transients);
-            ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
-            return 0;
-        }
+		transients.setSecureMessagingEncryptionCounter(nval);
+	}
 
-        final byte[] buf = transients.buffer;
+	protected short verifyAndDecryptCommand(Transients transients, short dataLen, short dataWithHeaderLen) {
 
-        macer.init(smac);
-        macer.update(mac_chaining, (short)0, Constants.AES_BLOCK_SIZE);
-        macer.update(buf, dataLen, (short)(dataWithHeaderLen - dataLen));
-        macer.sign(buf, (short)0, (short)(dataLen - MAC_LENGTH),
-                   buf, dataLen, Constants.AES_BLOCK_SIZE);
+		if (!isSessionAvailable()) {
+			ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
+			return 0;
+		}
 
-        if(Util.arrayCompare(buf, (short)(dataLen - MAC_LENGTH),
-                             buf, dataLen,
-                             MAC_LENGTH) != (byte)0) {
-            clearSession(transients);
-            ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
-            return 0;
-        }
+		incrementEncryptionCounter(transients);
 
-        Util.arrayCopyNonAtomic(buf, dataLen,
-                                mac_chaining, (short)0,
-                                Constants.AES_BLOCK_SIZE);
+		if (dataLen < MAC_LENGTH) {
+			clearSession(transients);
+			ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
+			return 0;
+		}
 
-        dataLen -= MAC_LENGTH;
+		byte[] buf = transients.buffer;
 
-        if(dataLen > 0) {
-            Util.arrayFillNonAtomic(buf, dataLen, Constants.AES_BLOCK_SIZE, (byte)0);
-            Util.setShort(buf, (short)(dataLen + Constants.AES_BLOCK_SIZE - 2),
-                          transients.secureMessagingEncryptionCounter());
+		macer.init(smac);
+		macer.update(mac_chaining, (short) 0, Constants.AES_BLOCK_SIZE);
+		macer.update(buf, dataLen, (short) (dataWithHeaderLen - dataLen));
+		macer.sign(buf, (short) 0, (short) (dataLen - MAC_LENGTH), buf, dataLen, Constants.AES_BLOCK_SIZE);
 
-            cipher.init(senc, Cipher.MODE_ENCRYPT);
-            cipher.doFinal(buf, dataLen, Constants.AES_BLOCK_SIZE,
-                           iv, (short)0);
+		if (Util.arrayCompare(buf, (short) (dataLen - MAC_LENGTH), buf, dataLen, MAC_LENGTH) != (byte) 0) {
+			clearSession(transients);
+			ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
+			return 0;
+		}
 
-            cipher.init(senc, Cipher.MODE_DECRYPT,
-                        iv, (short)0, Constants.AES_BLOCK_SIZE);
+		Util.arrayCopyNonAtomic(buf, dataLen, mac_chaining, (short) 0, Constants.AES_BLOCK_SIZE);
 
+		dataLen -= MAC_LENGTH;
 
-            short tmp = (short)(Constants.INTERNAL_BUFFER_MAX_LENGTH - dataLen);
-            if(tmp < Constants.AES_BLOCK_SIZE) {
-                ISOException.throwIt(Constants.SW_MEMORY_FAILURE);
-                return 0;
-            }
+		if (dataLen > 0) {
+			Util.arrayFillNonAtomic(buf, dataLen, Constants.AES_BLOCK_SIZE, (byte) 0);
+			Util.setShort(buf, (short) (dataLen + Constants.AES_BLOCK_SIZE - 2),
+					transients.secureMessagingEncryptionCounter());
 
-            Util.arrayCopyNonAtomic(buf, (short)0,
-                                    buf, tmp,
-                                    dataLen);
-            dataLen = 0;
-            while(tmp < Constants.INTERNAL_BUFFER_MAX_LENGTH) {
-                if((short)(Constants.INTERNAL_BUFFER_MAX_LENGTH - tmp) <= Constants.AES_BLOCK_SIZE) {
-                    dataLen += cipher.doFinal(buf, tmp, (short)(Constants.INTERNAL_BUFFER_MAX_LENGTH - tmp),
-                                              buf, dataLen);
-                    tmp = Constants.INTERNAL_BUFFER_MAX_LENGTH;
-                } else {
-                    dataLen += cipher.update(buf, tmp, Constants.AES_BLOCK_SIZE,
-                                             buf, dataLen);
-                    tmp += Constants.AES_BLOCK_SIZE;
-                }
-            }
+			ThothPGPApplet.cipher_aes_cbc_nopad.init(senc, Cipher.MODE_ENCRYPT);
+			ThothPGPApplet.cipher_aes_cbc_nopad.doFinal(buf, dataLen, Constants.AES_BLOCK_SIZE, iv, (short) 0);
 
-            Util.arrayFillNonAtomic(iv, (short)0, (short)iv.length, (byte)0);
+			ThothPGPApplet.cipher_aes_cbc_nopad.init(senc, Cipher.MODE_DECRYPT, iv, (short) 0,
+					Constants.AES_BLOCK_SIZE);
 
-            --dataLen;
-            while((dataLen > 0) && buf[dataLen] == (byte)0)
-                --dataLen;
+			short tmp = (short) (Constants.INTERNAL_BUFFER_MAX_LENGTH - dataLen);
+			if (tmp < Constants.AES_BLOCK_SIZE) {
+				ISOException.throwIt(Constants.SW_MEMORY_FAILURE);
+				return 0;
+			}
 
-            if((dataLen <= 0) || (buf[dataLen] != (byte)0x80)) {
-                clearSession(transients);
-                ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
-                return 0;
-            }
+			Util.arrayCopyNonAtomic(buf, (short) 0, buf, tmp, dataLen);
+			dataLen = 0;
+			while (tmp < Constants.INTERNAL_BUFFER_MAX_LENGTH) {
+				if ((short) (Constants.INTERNAL_BUFFER_MAX_LENGTH - tmp) <= Constants.AES_BLOCK_SIZE) {
+					dataLen += ThothPGPApplet.cipher_aes_cbc_nopad.doFinal(buf, tmp,
+							(short) (Constants.INTERNAL_BUFFER_MAX_LENGTH - tmp), buf, dataLen);
+					tmp = Constants.INTERNAL_BUFFER_MAX_LENGTH;
+				} else {
+					dataLen += ThothPGPApplet.cipher_aes_cbc_nopad.update(buf, tmp, Constants.AES_BLOCK_SIZE, buf,
+							dataLen);
+					tmp += Constants.AES_BLOCK_SIZE;
+				}
+			}
 
-        }
+			Util.arrayFillNonAtomic(iv, (short) 0, (short) iv.length, (byte) 0);
 
-        return dataLen;
-    }
+			--dataLen;
+			while ((dataLen > 0) && buf[dataLen] == (byte) 0)
+				--dataLen;
 
+			if ((dataLen <= 0) || (buf[dataLen] != (byte) 0x80)) {
+				clearSession(transients);
+				ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
+				return 0;
+			}
 
+		}
 
-    protected final short encryptAndSign(final Transients transients,
-                                         short dataLen,
-                                         final short sw) {
+		return dataLen;
+	}
 
-        if(!isSessionAvailable()) {
-            ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
-            return 0;
-        }
+	protected short encryptAndSign(Transients transients, short dataLen, short sw) {
 
-        final byte[] buf = transients.buffer;
+		if (!isSessionAvailable()) {
+			ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
+			return 0;
+		}
 
-        if(dataLen > 0) {
-            Util.arrayFillNonAtomic(buf, dataLen, Constants.AES_BLOCK_SIZE, (byte)0);
-            buf[dataLen] = (byte)0x80;
-            Util.setShort(buf, (short)(dataLen + Constants.AES_BLOCK_SIZE - 2),
-                          transients.secureMessagingEncryptionCounter());
+		byte[] buf = transients.buffer;
 
-            cipher.init(senc, Cipher.MODE_ENCRYPT);
+		if (dataLen > 0) {
+			Util.arrayFillNonAtomic(buf, dataLen, Constants.AES_BLOCK_SIZE, (byte) 0);
+			buf[dataLen] = (byte) 0x80;
+			Util.setShort(buf, (short) (dataLen + Constants.AES_BLOCK_SIZE - 2),
+					transients.secureMessagingEncryptionCounter());
 
-            cipher.doFinal(buf, dataLen, Constants.AES_BLOCK_SIZE,
-                           iv, (short)0);
+			ThothPGPApplet.cipher_aes_cbc_nopad.init(senc, Cipher.MODE_ENCRYPT);
 
-            cipher.init(senc, Cipher.MODE_ENCRYPT,
-                        iv, (short)0, Constants.AES_BLOCK_SIZE);
+			ThothPGPApplet.cipher_aes_cbc_nopad.doFinal(buf, dataLen, Constants.AES_BLOCK_SIZE, iv, (short) 0);
 
-            short tmp = (short)(Constants.INTERNAL_BUFFER_MAX_LENGTH - dataLen);
-            if(tmp < Constants.AES_BLOCK_SIZE) {
-                ISOException.throwIt(Constants.SW_MEMORY_FAILURE);
-                return 0;
-            }
+			ThothPGPApplet.cipher_aes_cbc_nopad.init(senc, Cipher.MODE_ENCRYPT, iv, (short) 0,
+					Constants.AES_BLOCK_SIZE);
 
-            Util.arrayCopyNonAtomic(buf, (short)0,
-                                    buf, tmp,
-                                    dataLen);
-            dataLen = 0;
-            while(tmp < Constants.INTERNAL_BUFFER_MAX_LENGTH) {
-                if((short)(Constants.INTERNAL_BUFFER_MAX_LENGTH - tmp) <= Constants.AES_BLOCK_SIZE) {
-                    dataLen += cipher.doFinal(buf, tmp, (short)(Constants.INTERNAL_BUFFER_MAX_LENGTH - tmp),
-                                              buf, dataLen);
-                    tmp = Constants.INTERNAL_BUFFER_MAX_LENGTH;
-                } else {
-                    dataLen += cipher.update(buf, tmp, Constants.AES_BLOCK_SIZE,
-                                             buf, dataLen);
-                    tmp += Constants.AES_BLOCK_SIZE;
-                }
-            }
+			short tmp = (short) (Constants.INTERNAL_BUFFER_MAX_LENGTH - dataLen);
+			if (tmp < Constants.AES_BLOCK_SIZE) {
+				ISOException.throwIt(Constants.SW_MEMORY_FAILURE);
+				return 0;
+			}
 
-            Util.arrayFillNonAtomic(iv, (short)0, (short)iv.length, (byte)0);
-        }
+			Util.arrayCopyNonAtomic(buf, (short) 0, buf, tmp, dataLen);
+			dataLen = 0;
+			while (tmp < Constants.INTERNAL_BUFFER_MAX_LENGTH) {
+				if ((short) (Constants.INTERNAL_BUFFER_MAX_LENGTH - tmp) <= Constants.AES_BLOCK_SIZE) {
+					dataLen += ThothPGPApplet.cipher_aes_cbc_nopad.doFinal(buf, tmp,
+							(short) (Constants.INTERNAL_BUFFER_MAX_LENGTH - tmp), buf, dataLen);
+					tmp = Constants.INTERNAL_BUFFER_MAX_LENGTH;
+				} else {
+					dataLen += ThothPGPApplet.cipher_aes_cbc_nopad.update(buf, tmp, Constants.AES_BLOCK_SIZE, buf,
+							dataLen);
+					tmp += Constants.AES_BLOCK_SIZE;
+				}
+			}
 
-        macer.init(srmac);
+			Util.arrayFillNonAtomic(iv, (short) 0, (short) iv.length, (byte) 0);
+		}
 
-        macer.update(mac_chaining, (short)0, Constants.AES_BLOCK_SIZE);
-        if(dataLen > 0) {
-            macer.update(buf, (short)0, dataLen);
-        }
-        macer.updateShort(sw);
-        dataLen += macer.sign(null, (short)0, (short)0,
-                              buf, dataLen, MAC_LENGTH);
+		macer.init(srmac);
 
-        return dataLen;
-    }
+		macer.update(mac_chaining, (short) 0, Constants.AES_BLOCK_SIZE);
+		if (dataLen > 0) {
+			macer.update(buf, (short) 0, dataLen);
+		}
+		macer.updateShort(sw);
+		dataLen += macer.sign(null, (short) 0, (short) 0, buf, dataLen, MAC_LENGTH);
+
+		return dataLen;
+	}
 
 }

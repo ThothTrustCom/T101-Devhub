@@ -1,0 +1,504 @@
+// converted by version  [v3.0.4]
+// on Fri Mar 13 15:52:05 SGT 2020
+
+.package org/thothtrust/sc/certstore {
+	.aid 0x54:0x54:0x43:0x52:0x53;
+	.version 1.0;
+
+	.imports {
+		0xA0:0x0:0x0:0x0:0x62:0x0:0x1 1.0;		//java/lang
+		0xA0:0x0:0x0:0x0:0x62:0x1:0x1 1.5;		//javacard/framework
+	}
+
+	.applet {
+		0x54:0x54:0x43:0x52:0x53:0xFF CertStoreApplet;
+	}
+
+	.constantPool {
+		// 0
+		instanceFieldRef byte[] CertStoreApplet/clientAIDBytes;
+		// 1
+		instanceFieldRef short CertStoreApplet/cert1Len;
+		// 2
+		instanceFieldRef short CertStoreApplet/cert2Len;
+		// 3
+		instanceFieldRef short CertStoreApplet/cert3Len;
+		// 4
+		instanceFieldRef short CertStoreApplet/cert4Len;
+		// 5
+		virtualMethodRef 1.6.2([BSB)Z;		// equals([BSB)Z
+		// 6
+		.classRef CertStoreApplet;
+		// 7
+		staticMethodRef CertStoreApplet/<init>()V;
+		// 8
+		staticMethodRef 1.3.0()V;		// javacard/framework/Applet.<init>()V
+		// 9
+		virtualMethodRef 1.3.1()V;		// register()V
+		// 10
+		virtualMethodRef 1.3.3()Z;		// selectingApplet()Z
+		// 11
+		staticMethodRef 1.7.1(S)V;		// javacard/framework/ISOException.throwIt(S)V
+		// 12
+		staticMethodRef CertStoreApplet/doCertIOByIndicator(BZ[BSSS)S;
+		// 13
+		staticMethodRef CertStoreApplet/clearCertByIndicator(B)V;
+		// 14
+		staticMethodRef CertStoreApplet/getCertLengthByIndicator(B)S;
+		// 15
+		staticMethodRef 1.8.1()V;		// javacard/framework/JCSystem.beginTransaction()V
+		// 16
+		staticFieldRef byte[] CertStoreApplet/cert1;
+		// 17
+		staticMethodRef 1.16.3([BSSB)S;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+		// 18
+		staticMethodRef 1.8.2()V;		// javacard/framework/JCSystem.commitTransaction()V
+		// 19
+		staticFieldRef byte[] CertStoreApplet/cert2;
+		// 20
+		staticFieldRef byte[] CertStoreApplet/cert3;
+		// 21
+		staticFieldRef byte[] CertStoreApplet/cert4;
+		// 22
+		staticMethodRef 1.16.1([BS[BSS)S;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+		// 23
+		staticMethodRef 1.16.2([BS[BSS)S;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+	}
+
+	.interface public abstract CertStoreAPI 0 {
+
+		.shareable;
+
+		.superInterfaces {
+			1.2;		// javacard/framework/Shareable
+		}
+
+		.method public abstract writeCert(B[BSSS)Z 0 {
+		}
+
+		.method public abstract readCert(B[BSSS)S 1 {
+		}
+
+		.method public abstract clearCert(B)V 2 {
+		}
+
+		.method public abstract certLength(B)S 3 {
+		}
+
+	}
+
+	.class public CertStoreApplet 1 extends 1.3 {		// extends javacard/framework/Applet
+
+		.shareable;
+
+		.fields {
+			public short cert1Len 0;		// S
+			public short cert2Len 1;		// S
+			public short cert3Len 2;		// S
+			public short cert4Len 3;		// S
+			private byte[] clientAIDBytes 4;		// [B
+			public static final short MAX_CERT_SIZE = 1152;		// S
+			public static byte[] cert1 0 = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};		// [B
+			public static byte[] cert2 1 = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};		// [B
+			public static byte[] cert3 2 = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};		// [B
+			public static byte[] cert4 3 = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};		// [B
+		}
+
+		.publicMethodTable 5 {
+			equals(Ljava/lang/Object;)Z;
+			register()V;
+			register([BSB)V;
+			selectingApplet()Z;
+			deselect()V;
+			getShareableInterfaceObject(Ljavacard/framework/AID;B)Ljavacard/framework/Shareable;;
+			select()Z;
+			process(Ljavacard/framework/APDU;)V;
+			writeCert(B[BSSS)Z;
+			readCert(B[BSSS)S;
+			clearCert(B)V;
+			certLength(B)S;
+		}
+
+		.packageMethodTable 0 {
+		}
+
+		.implementedInterfaceInfoTable { 
+			.interface 1.2 { 		// javacard/framework/Shareable
+			}
+
+			.interface CertStoreAPI { 
+				8;		// writeCert(B[BSSS)Z
+				9;		// readCert(B[BSSS)S
+				10;		// clearCert(B)V
+				11;		// certLength(B)S
+			}
+
+		}
+
+		.method public getShareableInterfaceObject(Ljavacard/framework/AID;B)Ljavacard/framework/Shareable; 5 {
+			.stack 5;
+			.locals 0;
+
+			.descriptor	Ljavacard/framework/AID;	1.6;
+			.descriptor	Ljavacard/framework/Shareable;	1.2;
+
+				L0:	aload_1;
+					getfield_a_this 0;		// reference org/thothtrust/sc/certstore/CertStoreApplet.clientAIDBytes
+					sconst_0;
+					getfield_a_this 0;		// reference org/thothtrust/sc/certstore/CertStoreApplet.clientAIDBytes
+					arraylength;
+					sspush 255;
+					sand;
+					s2b;
+					invokevirtual 5;		// equals([BSB)Z
+					ifeq L2;
+				L1:	aload_0;
+					areturn;
+				L2:	aconst_null;
+					areturn;
+		}
+
+		.method public static install([BSB)V 0 {
+			.stack 1;
+			.locals 0;
+
+				L0:	new 6;		// org/thothtrust/sc/certstore/CertStoreApplet
+					invokespecial 7;		// org/thothtrust/sc/certstore/CertStoreApplet.<init>()V
+					return;
+		}
+
+		.method protected <init>()V 1 {
+			.stack 5;
+			.locals 0;
+
+				L0:	aload_0;
+					invokespecial 8;		// javacard/framework/Applet.<init>()V
+					aload_0;
+					bspush 16;
+					newarray 11;
+					dup;
+					sconst_0;
+					bspush -46;
+					bastore;
+					dup;
+					sconst_1;
+					bspush 118;
+					bastore;
+					dup;
+					sconst_3;
+					sconst_1;
+					bastore;
+					dup;
+					sconst_4;
+					bspush 36;
+					bastore;
+					dup;
+					sconst_5;
+					sconst_1;
+					bastore;
+					dup;
+					bspush 6;
+					sconst_3;
+					bastore;
+					dup;
+					bspush 7;
+					sconst_3;
+					bastore;
+					dup;
+					bspush 8;
+					bspush -81;
+					bastore;
+					dup;
+					bspush 9;
+					bspush -81;
+					bastore;
+					putfield_a 0;		// reference org/thothtrust/sc/certstore/CertStoreApplet.clientAIDBytes
+					aload_0;
+					sconst_0;
+					putfield_s 1;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert1Len
+					aload_0;
+					sconst_0;
+					putfield_s 2;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert2Len
+					aload_0;
+					sconst_0;
+					putfield_s 3;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert3Len
+					aload_0;
+					sconst_0;
+					putfield_s 4;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert4Len
+					aload_0;
+					invokevirtual 9;		// register()V
+					return;
+		}
+
+		.method public process(Ljavacard/framework/APDU;)V 7 {
+			.stack 1;
+			.locals 0;
+
+			.descriptor	Ljavacard/framework/APDU;	1.10;
+
+				L0:	aload_0;
+					invokevirtual 10;		// selectingApplet()Z
+					ifeq L2;
+				L1:	return;
+				L2:	sspush 27014;
+					invokestatic 11;		// javacard/framework/ISOException.throwIt(S)V
+					return;
+		}
+
+		.method public writeCert(B[BSSS)Z 8 {
+			.stack 7;
+			.locals 0;
+
+				L0:	aload_0;
+					sload_1;
+					sconst_1;
+					aload_2;
+					sload_3;
+					sload 4;
+					sload 5;
+					invokespecial 12;		// org/thothtrust/sc/certstore/CertStoreApplet.doCertIOByIndicator(BZ[BSSS)S
+					sload 5;
+					if_scmpne L2;
+				L1:	sconst_1;
+					sreturn;
+				L2:	sconst_0;
+					sreturn;
+		}
+
+		.method public readCert(B[BSSS)S 9 {
+			.stack 7;
+			.locals 0;
+
+				L0:	aload_0;
+					sload_1;
+					sconst_0;
+					aload_2;
+					sload_3;
+					sload 4;
+					sload 5;
+					invokespecial 12;		// org/thothtrust/sc/certstore/CertStoreApplet.doCertIOByIndicator(BZ[BSSS)S
+					sreturn;
+		}
+
+		.method public clearCert(B)V 10 {
+			.stack 2;
+			.locals 0;
+
+				L0:	aload_0;
+					sload_1;
+					invokespecial 13;		// org/thothtrust/sc/certstore/CertStoreApplet.clearCertByIndicator(B)V
+					return;
+		}
+
+		.method public certLength(B)S 11 {
+			.stack 2;
+			.locals 0;
+
+				L0:	aload_0;
+					sload_1;
+					invokespecial 14;		// org/thothtrust/sc/certstore/CertStoreApplet.getCertLengthByIndicator(B)S
+					sreturn;
+		}
+
+		.method private getCertLengthByIndicator(B)S {
+			.stack 1;
+			.locals 0;
+
+				L0:	sload_1;
+					stableswitch L5 -1 2 L4 L1 L2 L3;
+				L1:	getfield_s_this 1;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert1Len
+					sreturn;
+				L2:	getfield_s_this 2;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert2Len
+					sreturn;
+				L3:	getfield_s_this 3;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert3Len
+					sreturn;
+				L4:	getfield_s_this 4;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert4Len
+					sreturn;
+				L5:	sspush 27267;
+					invokestatic 11;		// javacard/framework/ISOException.throwIt(S)V
+					sconst_m1;
+					sreturn;
+		}
+
+		.method private clearCertByIndicator(B)V {
+			.stack 4;
+			.locals 0;
+
+				L0:	sload_1;
+					stableswitch L5 -1 2 L4 L1 L2 L3;
+				L1:	invokestatic 15;		// javacard/framework/JCSystem.beginTransaction()V
+					getstatic_a 16;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert1
+					sconst_0;
+					getstatic_a 16;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert1
+					arraylength;
+					sconst_0;
+					invokestatic 17;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					aload_0;
+					sconst_0;
+					putfield_s 1;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert1Len
+					invokestatic 18;		// javacard/framework/JCSystem.commitTransaction()V
+					return;
+				L2:	invokestatic 15;		// javacard/framework/JCSystem.beginTransaction()V
+					getstatic_a 19;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert2
+					sconst_0;
+					getstatic_a 19;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert2
+					arraylength;
+					sconst_0;
+					invokestatic 17;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					aload_0;
+					sconst_0;
+					putfield_s 2;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert2Len
+					invokestatic 18;		// javacard/framework/JCSystem.commitTransaction()V
+					return;
+				L3:	invokestatic 15;		// javacard/framework/JCSystem.beginTransaction()V
+					getstatic_a 20;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert3
+					sconst_0;
+					getstatic_a 20;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert3
+					arraylength;
+					sconst_0;
+					invokestatic 17;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					aload_0;
+					sconst_0;
+					putfield_s 3;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert3Len
+					invokestatic 18;		// javacard/framework/JCSystem.commitTransaction()V
+					return;
+				L4:	invokestatic 15;		// javacard/framework/JCSystem.beginTransaction()V
+					getstatic_a 21;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert4
+					sconst_0;
+					getstatic_a 21;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert4
+					arraylength;
+					sconst_0;
+					invokestatic 17;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
+					pop;
+					aload_0;
+					sconst_0;
+					putfield_s 4;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert4Len
+					invokestatic 18;		// javacard/framework/JCSystem.commitTransaction()V
+					return;
+				L5:	sspush 27267;
+					invokestatic 11;		// javacard/framework/ISOException.throwIt(S)V
+					return;
+		}
+
+		.method private doCertIOByIndicator(BZ[BSSS)S {
+			.stack 5;
+			.locals 0;
+
+				L0:	sload_1;
+					stableswitch L13 -1 2 L10 L1 L4 L7;
+				L1:	sload_2;
+					ifeq L3;
+				L2:	invokestatic 15;		// javacard/framework/JCSystem.beginTransaction()V
+					aload_3;
+					sload 4;
+					getstatic_a 16;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert1
+					sload 5;
+					sload 6;
+					invokestatic 22;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+					pop;
+					aload_0;
+					dup;
+					getfield_s 1;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert1Len
+					sload 6;
+					sadd;
+					putfield_s 1;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert1Len
+					invokestatic 18;		// javacard/framework/JCSystem.commitTransaction()V
+					sload 6;
+					sreturn;
+				L3:	getstatic_a 16;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert1
+					sload 5;
+					aload_3;
+					sload 4;
+					sload 6;
+					invokestatic 23;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					sreturn;
+				L4:	sload_2;
+					ifeq L6;
+				L5:	invokestatic 15;		// javacard/framework/JCSystem.beginTransaction()V
+					aload_3;
+					sload 4;
+					getstatic_a 19;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert2
+					sload 5;
+					sload 6;
+					invokestatic 22;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+					pop;
+					aload_0;
+					dup;
+					getfield_s 2;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert2Len
+					sload 6;
+					sadd;
+					putfield_s 2;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert2Len
+					invokestatic 18;		// javacard/framework/JCSystem.commitTransaction()V
+					sload 6;
+					sreturn;
+				L6:	getstatic_a 19;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert2
+					sload 5;
+					aload_3;
+					sload 4;
+					sload 6;
+					invokestatic 23;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					sreturn;
+				L7:	sload_2;
+					ifeq L9;
+				L8:	invokestatic 15;		// javacard/framework/JCSystem.beginTransaction()V
+					aload_3;
+					sload 4;
+					getstatic_a 20;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert3
+					sload 5;
+					sload 6;
+					invokestatic 22;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+					pop;
+					aload_0;
+					dup;
+					getfield_s 3;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert3Len
+					sload 6;
+					sadd;
+					putfield_s 3;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert3Len
+					invokestatic 18;		// javacard/framework/JCSystem.commitTransaction()V
+					sload 6;
+					sreturn;
+				L9:	getstatic_a 20;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert3
+					sload 5;
+					aload_3;
+					sload 4;
+					sload 6;
+					invokestatic 23;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					sreturn;
+				L10:	sload_2;
+					ifeq L12;
+				L11:	invokestatic 15;		// javacard/framework/JCSystem.beginTransaction()V
+					aload_3;
+					sload 4;
+					getstatic_a 21;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert4
+					sload 5;
+					sload 6;
+					invokestatic 22;		// javacard/framework/Util.arrayCopy([BS[BSS)S
+					pop;
+					aload_0;
+					dup;
+					getfield_s 4;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert4Len
+					sload 6;
+					sadd;
+					putfield_s 4;		// short org/thothtrust/sc/certstore/CertStoreApplet.cert4Len
+					invokestatic 18;		// javacard/framework/JCSystem.commitTransaction()V
+					sload 6;
+					sreturn;
+				L12:	getstatic_a 21;		// reference org/thothtrust/sc/certstore/CertStoreApplet.cert4
+					sload 5;
+					aload_3;
+					sload 4;
+					sload 6;
+					invokestatic 23;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					sreturn;
+				L13:	sspush 27267;
+					invokestatic 11;		// javacard/framework/ISOException.throwIt(S)V
+					sconst_0;
+					sreturn;
+		}
+
+	}
+
+}
