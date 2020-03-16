@@ -51,7 +51,7 @@ public class ThothPGPApplet extends Applet implements AppletEvent {
 			(byte) 0x00 };
 	public static byte[] csServerAID = new byte[] { (byte) 0x54, (byte) 0x54, (byte) 0x43, (byte) 0x52, (byte) 0x53,
 			(byte) 0xFF };
-	public static byte[] debug = new byte[5];
+	public static byte[] debug = new byte[12];
 
 	public ThothPGPApplet() {
 		cipher_aes_cbc_nopad = Cipher.getInstance(Cipher.ALG_AES_BLOCK_128_CBC_NOPAD, false);
@@ -113,9 +113,7 @@ public class ThothPGPApplet extends Applet implements AppletEvent {
 		case 3:
 			return sm.static_key;
 		default:
-			debug[0] = (byte) 0x31;
-//			ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
-			ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x31));
+			ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
 			return null;
 		}
 	}
@@ -268,14 +266,11 @@ public class ThothPGPApplet extends Applet implements AppletEvent {
 	}
 
 	private final short getKeyGenerationDates(final byte[] buf, short off, byte[] apduBuffer) {
-		ThothPGPApplet.apishim.getObjectCreationTS(ThothPGPApplet.apishim.getKeyHandle(Persistent.PGP_KEYS_OFFSET_AUT),
-				(short) 0, (short) 4, apduBuffer);
+		ThothPGPApplet.apishim.getObjectCreationTS(Persistent.PGP_KEYS_OFFSET_AUT, apduBuffer);
 		off = Util.arrayCopyNonAtomic(apduBuffer, (short) 0, buf, off, Constants.GENERATION_DATE_SIZE);
-		ThothPGPApplet.apishim.getObjectCreationTS(ThothPGPApplet.apishim.getKeyHandle(Persistent.PGP_KEYS_OFFSET_DEC),
-				(short) 0, (short) 4, apduBuffer);
+		ThothPGPApplet.apishim.getObjectCreationTS(Persistent.PGP_KEYS_OFFSET_DEC, apduBuffer);
 		off = Util.arrayCopyNonAtomic(apduBuffer, (short) 0, buf, off, Constants.GENERATION_DATE_SIZE);
-		ThothPGPApplet.apishim.getObjectCreationTS(ThothPGPApplet.apishim.getKeyHandle(Persistent.PGP_KEYS_OFFSET_SIG),
-				(short) 0, (short) 4, apduBuffer);
+		ThothPGPApplet.apishim.getObjectCreationTS(Persistent.PGP_KEYS_OFFSET_SIG, apduBuffer);
 		off = Util.arrayCopyNonAtomic(apduBuffer, (short) 0, buf, off, Constants.GENERATION_DATE_SIZE);
 		return off;
 	}
@@ -502,9 +497,7 @@ public class ThothPGPApplet extends Applet implements AppletEvent {
 			k = currentTagOccurenceToKey();
 
 			if (k == null) {
-				debug[0] = (byte) 0x33;
-//				ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
-				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x33));
+				ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
 				return 0;
 			}
 
@@ -539,9 +532,7 @@ public class ThothPGPApplet extends Applet implements AppletEvent {
 			break;
 
 		default:
-			debug[0] = (byte) 0x34;
-//			ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
-			ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x34));
+			ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
 			return 0;
 		}
 
@@ -921,9 +912,7 @@ public class ThothPGPApplet extends Applet implements AppletEvent {
 				assertAdmin();
 				k = currentTagOccurenceToKey();
 				if (k == null) {
-					debug[0] = (byte) 0x36;
-//					ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
-					ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x36));
+					ISOException.throwIt(Constants.SW_REFERENCE_DATA_NOT_FOUND);
 					return;
 				}
 
@@ -1067,8 +1056,6 @@ public class ThothPGPApplet extends Applet implements AppletEvent {
 
 	private final short processGenerateAsymmetricKeyPair(final short lc, final byte p1, final byte p2,
 			byte[] apduBuffer) {
-		
-		debug[1] = (byte) 0xFF;
 
 		final byte[] buf = transients.buffer;
 
@@ -1395,30 +1382,13 @@ public class ThothPGPApplet extends Applet implements AppletEvent {
 		short sw = (short) 0x9000;
 
 		// For testing if APIs have been successfully established
-		if (apdubuf[ISO7816.OFFSET_CLA] == (byte) 0xB0 && apdubuf[ISO7816.OFFSET_INS] == (byte) 0x00) {
-//			if (api == null) {
-//				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x61));
-//			}
-//			if (csapi == null) {
-//				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x62));
-//			}
-//			if (apishim == null) {
-//				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x63));
-//			}
-//			ISOException.throwIt(Util.makeShort(debug[0], debug[1]));
-//			return;
-			if (data.pgp_keys[(short) 0].is_initialized) {
-				debug[2] = (byte) 0xFF;
-			}
-			if (data.pgp_keys[(short) 1].is_initialized) {
-				debug[3] = (byte) 0xFF;
-			}
-			if (data.pgp_keys[(short) 2].is_initialized) {
-				debug[4] = (byte) 0xFF;
-			}
+		if (apdubuf[ISO7816.OFFSET_CLA] == (byte) 0xB0 && apdubuf[ISO7816.OFFSET_INS] == (byte) 0x00) {			
+			short outLen = getKeyGenerationDates(debug, (short) 0, apdubuf);
+			
 			apdu.setOutgoing();
-			apdu.setOutgoingLength((short) 5);
-			apdu.sendBytesLong(debug, (short) 0, (short) 5);
+			apdu.setOutgoingLength(outLen);
+			apdu.sendBytesLong(debug, (short) 0, outLen);
+			
 			return;
 		}
 
@@ -1626,7 +1596,6 @@ public class ThothPGPApplet extends Applet implements AppletEvent {
 			}
 		}
 		
-//		shortToBytes(sw, debug, (short) 0);
 		ISOException.throwIt(sw);
 	}
 

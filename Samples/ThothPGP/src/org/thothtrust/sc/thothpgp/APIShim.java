@@ -4,7 +4,6 @@ import KM101.T101OpenAPI;
 import javacard.framework.ISOException;
 import javacard.framework.JCSystem;
 import javacard.framework.Util;
-import javacard.security.CryptoException;
 import javacard.security.KeyAgreement;
 import javacard.security.MessageDigest;
 
@@ -103,8 +102,6 @@ public class APIShim {
 
 	private short rsaOps(byte mode, byte ind, byte[] input, short inOff, short inLen, byte[] output, short outOff,
 			byte[] apduBuffer) {
-//		
-//		Util.arrayCopyNonAtomic(input, inOff, output, outOff, inLen);
 
 		short uploadSize = 0;
 		short downloadSize = 0;
@@ -130,10 +127,6 @@ public class APIShim {
 			}
 			i += uploadSize;
 		}
-		
-//		// Debug by reading from buffer
-//		downloadSize = getBufferLength();
-//		readFromBuffer((short) 0, downloadSize, apduBuffer);
 
 		// Load RSA decryption key
 		if (executeObject(T101OpenAPI.EXEC_CRYPT_CONTENT_EXTRACT, T101OpenAPI.CRYPT_LOAD, mode, false, ind, appName,
@@ -141,27 +134,11 @@ public class APIShim {
 			return (short) -1;
 		}
 
-		try {
-			// Execute RSA decrypt on buffer data
-			downloadSize = executeObject(T101OpenAPI.EXEC_CRYPT_CONTENT_EXTRACT, T101OpenAPI.CRYPT_FINAL, mode, true,
-					ind, input, (short) (inOff + inLen - 1), (short) 1, apduBuffer);
-			if (downloadSize == (short) -1) {
-				return (short) -1;
-			}
-		} catch (CryptoException e) {
-			if (e.getReason() == CryptoException.ILLEGAL_USE) {
-				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x54));
-			} else if (e.getReason() == CryptoException.ILLEGAL_VALUE) {
-				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x55));
-			} else if (e.getReason() == CryptoException.INVALID_INIT) {
-				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x56));
-			} else if (e.getReason() == CryptoException.NO_SUCH_ALGORITHM) {
-				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x57));
-			} else if (e.getReason() == CryptoException.UNINITIALIZED_KEY) {
-				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x58));
-			} else {
-				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x5F));
-			}
+		// Execute RSA decrypt on buffer data
+		downloadSize = executeObject(T101OpenAPI.EXEC_CRYPT_CONTENT_EXTRACT, T101OpenAPI.CRYPT_FINAL, mode, true, ind,
+				input, (short) (inOff + inLen - 1), (short) 1, apduBuffer);
+		if (downloadSize == (short) -1) {
+			return (short) -1;
 		}
 
 		// Copy to output
@@ -665,15 +642,22 @@ public class APIShim {
 		return result;
 	}
 
-	public short getObjectCreationTS(byte[] objName, short nameOffset, short nameLen, byte[] buffer) {
-		Util.arrayCopyNonAtomic(objName, nameOffset, buffer, (short) 0, nameLen);
+	public short getObjectCreationTS(byte ind , byte[] buffer) {
+		short nameLen = 4;
+		
+		// Copy object handle name into buffer for API call
+		Util.arrayCopyNonAtomic(getKeyHandle(ind), (short) 0, buffer, (short) 0, nameLen);
+		
+		// Copy PUK username into buffer for API call
 		Util.arrayCopyNonAtomic(pukName, (short) 0, buffer, (short) nameLen, (short) pukName.length);
-		if (ThothPGPApplet.api.getObjectInfo(buffer, (short) 0, nameLen, T101OpenAPI.ACT_OBJ_CREATE, buffer,
-				(short) (nameLen + pukName.length), KM101.T101OpenAPI.CRED_FIELD_NAME, buffer, (short) nameLen,
+
+		if (ThothPGPApplet.api.getObjectInfo(buffer, (short) 0, nameLen, T101OpenAPI.OBJ_FIELD_CREATE, buffer,
+				(short) (nameLen + pukName.length), T101OpenAPI.CRED_FIELD_NAME, buffer, (short) nameLen,
 				(short) pukName.length, KM101.T101OpenAPI.AUTH_INTERNAL) != (short) -1) {
 			Util.arrayCopyNonAtomic(buffer, (short) (nameLen + pukName.length), nonceBuffer, (short) 0, (short) 8);
 			return authContainer(pukUserPin, (short) 0, (short) pukUserPin.length, nonceBuffer, (short) 0, buffer);
 		}
+
 		return (short) -1;
 	}
 
