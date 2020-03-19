@@ -4,7 +4,6 @@ import KM101.T101OpenAPI;
 import javacard.framework.ISOException;
 import javacard.framework.JCSystem;
 import javacard.framework.Util;
-import javacard.security.KeyAgreement;
 import javacard.security.MessageDigest;
 
 public class APIShim {
@@ -203,68 +202,6 @@ public class APIShim {
 		return 0;
 	}
 
-	/**
-	 * Performs ECDH using selected ECC key. APDU buffer with offset of 0 will be
-	 * used to store output.
-	 * 
-	 * @param keyHandle
-	 * @param handleOff
-	 * @param handleLen
-	 * @param publicKey
-	 * @param keyOff
-	 * @param keyLen
-	 * @param apduBuffer
-	 * @return
-	 */
-	public short ecdh(byte ind, byte[] publicKey, short keyOff, short keyLen, byte[] apduBuffer) {
-		if (confirmationUI(TXT_CRYPT_OPS_TITLE, (short) 0, (short) TXT_CRYPT_OPS_TITLE.length, TXT_CRYPT_OPS, (short) 0,
-				(short) TXT_CRYPT_OPS.length, apduBuffer)) {
-
-			// Load ECC Key
-			if (executeObject(T101OpenAPI.EXEC_CRYPT_CONTENT_PROTECT, T101OpenAPI.CRYPT_LOAD,
-					KeyAgreement.ALG_EC_SVDP_DH_PLAIN, false, ind, null, (short) 0, (short) 0,
-					apduBuffer) == (short) -1) {
-				return (short) -1;
-			}
-
-			// Execute ECDH
-			return executeObject(T101OpenAPI.EXEC_CRYPT_CONTENT_PROTECT, T101OpenAPI.CRYPT_FINAL,
-					KeyAgreement.ALG_EC_SVDP_DH_PLAIN, false, ind, publicKey, keyOff, keyLen, apduBuffer);
-		}
-
-		return (short) 0;
-	}
-
-	/**
-	 * Perform ECDSA over pre-computed hash. APDU buffer with offset of 0 will be
-	 * used to store output.
-	 * 
-	 * @param keyHandle
-	 * @param handleOff
-	 * @param handleLen
-	 * @param message
-	 * @param msgOff
-	 * @param msgLen
-	 * @param apduBuffer
-	 * @return
-	 */
-	public short signPreComputeHashECDSA(byte ind, byte[] message, short msgOff, short msgLen, byte[] apduBuffer) {
-		if (confirmationUI(TXT_SIG_OPS_TITLE, (short) 0, (short) TXT_SIG_OPS_TITLE.length, TXT_SIG_OPS, (short) 0,
-				(short) TXT_SIG_OPS.length, apduBuffer)) {
-			// Load ECC Key
-			if (executeObject(T101OpenAPI.EXEC_CRYPT_INTEGRITY_CREATION, T101OpenAPI.CRYPT_LOAD, (byte) 0x00, false,
-					ind, null, (short) 0, (short) 0, apduBuffer) == (short) -1) {
-				return (short) -1;
-			}
-
-			// Execute ECDSA
-			return executeObject(T101OpenAPI.EXEC_CRYPT_INTEGRITY_CREATION, T101OpenAPI.CRYPT_FINAL, (byte) 0x00, false,
-					ind, message, msgOff, msgLen, apduBuffer);
-		}
-
-		return (short) 0;
-	}
-
 	public short getPublicKey(byte[] keyHandle, short handleOff, short handleLen, byte[] apduBuffer) {
 		Util.arrayCopyNonAtomic(keyHandle, handleOff, apduBuffer, (short) 0, handleLen);
 		Util.arrayCopyNonAtomic(pukName, (short) 0, apduBuffer, handleLen, (short) pukName.length);
@@ -377,11 +314,7 @@ public class APIShim {
 			if (authContainer(aocPin, aocPinOffset, aocPinLen, apduBuffer, (short) (6 + adminPinLen + adminUserLen),
 					apduBuffer) == 1) {
 				return true;
-			} else {
-				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x15));
 			}
-		} else {
-			ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x14));
 		}
 
 		return false;
@@ -404,11 +337,7 @@ public class APIShim {
 					(short) 8);
 			if (authContainer(adminPin, adminPinOffset, adminPinLen, nonceBuffer, (short) 0, apduBuffer) == 1) {
 				return true;
-			} else {
-				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x17));
 			}
-		} else {
-			ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x16));
 		}
 
 		return false;
@@ -424,6 +353,7 @@ public class APIShim {
 					T101OpenAPI.AUTH_FRONTPANEL);
 		}
 		return (short) -1;
+//		return (short) 3; // Debugging use only
 	}
 
 	public short loginAdminUserAndGetTries(byte[] apduBuffer) {
@@ -436,6 +366,7 @@ public class APIShim {
 					T101OpenAPI.AUTH_FRONTPANEL);
 		}
 		return (short) -1;
+//		return (short) 3; // Debugging use only
 	}
 
 	public boolean adminResetNormalUserPin(byte[] apduBuffer) {
@@ -642,12 +573,31 @@ public class APIShim {
 		return result;
 	}
 
-	public short getObjectCreationTS(byte ind , byte[] buffer) {
+	public short getObjectCryptoType(byte ind, byte[] buffer) {
 		short nameLen = 4;
-		
+
 		// Copy object handle name into buffer for API call
 		Util.arrayCopyNonAtomic(getKeyHandle(ind), (short) 0, buffer, (short) 0, nameLen);
-		
+
+		// Copy PUK username into buffer for API call
+		Util.arrayCopyNonAtomic(pukName, (short) 0, buffer, (short) nameLen, (short) pukName.length);
+
+		if (ThothPGPApplet.api.getObjectInfo(buffer, (short) 0, nameLen, T101OpenAPI.OBJ_FIELD_SUBTYPE_TYPE, buffer,
+				(short) (nameLen + pukName.length), T101OpenAPI.CRED_FIELD_NAME, buffer, (short) nameLen,
+				(short) pukName.length, KM101.T101OpenAPI.AUTH_INTERNAL) != (short) -1) {
+			Util.arrayCopyNonAtomic(buffer, (short) (nameLen + pukName.length), nonceBuffer, (short) 0, (short) 8);
+			return authContainer(pukUserPin, (short) 0, (short) pukUserPin.length, nonceBuffer, (short) 0, buffer);
+		}
+
+		return (short) -1;
+	}
+
+	public short getObjectCreationTS(byte ind, byte[] buffer) {
+		short nameLen = 4;
+
+		// Copy object handle name into buffer for API call
+		Util.arrayCopyNonAtomic(getKeyHandle(ind), (short) 0, buffer, (short) 0, nameLen);
+
 		// Copy PUK username into buffer for API call
 		Util.arrayCopyNonAtomic(pukName, (short) 0, buffer, (short) nameLen, (short) pukName.length);
 

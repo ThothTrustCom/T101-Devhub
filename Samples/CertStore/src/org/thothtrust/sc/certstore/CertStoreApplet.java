@@ -174,5 +174,12 @@ public class CertStoreApplet extends Applet implements CertStoreAPI {
 			return (short) 0;
 		}
 	}
+	
+	public void resetAllCerts() {
+		clearCertByIndicator((byte) 0x00);
+		clearCertByIndicator((byte) 0x01);
+		clearCertByIndicator((byte) 0x02);
+		clearCertByIndicator((byte) 0xFF);
+	}
 
 }

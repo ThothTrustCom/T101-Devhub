@@ -10,4 +10,6 @@ public interface CertStoreAPI extends Shareable {
 	public void clearCert(byte ind);
 	
 	public short certLength(byte ind);
+	
+	public void resetAllCerts();
 }

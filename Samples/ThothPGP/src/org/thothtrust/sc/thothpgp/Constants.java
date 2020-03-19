@@ -144,10 +144,10 @@ public class Constants {
 					 */
 			0x10 | /* support pw status changes */
 			0x08 | /* support private DOs (0101-0104) */
-			0x04 | /* support algorithm attributes changes */
+			0x00 | /* support algorithm attributes changes */
 			0x02 | /* support PSO:DEC/ENC AES */
 			0x00), /* support KDF-DO - CURRENTLY DISABLED AS PIN USAGE FROM FRONT PANEL ONLY */
-			(byte) 0x03, /* SM 0x01 = 128 bits, 0x02 = 256 bits, 0x03 = SCP11b */
+			(byte) 0x00, /* SM 0x01 = 128 bits, 0x02 = 256 bits, 0x03 = SCP11b */
 			(byte) 0x00, (byte) 0x20, /* max length get challenge */
 			(byte) 0x04, (byte) 0x80, /* max length of carholder certificate */
 			(byte) 0x00, (byte) 0xff, /* max length of special DOs (private, login, url, KDF-DO) */
