@@ -1,5 +1,5 @@
 // converted by version  [v3.0.4]
-// on Wed Apr 22 16:13:03 SGT 2020
+// on Thu Apr 23 14:38:45 SGT 2020
 
 .package org/satochip/applet {
 	.aid 0x53:0x61:0x74:0x6F:0x43:0x68:0x69:0x70;
@@ -4451,7 +4451,7 @@
 				L10:	sload 4;
 					iflt L12;
 				L11:	sload 4;
-					bspush 64;
+					sspush 192;
 					if_scmple L13;
 				L12:	sspush 26368;
 					invokestatic 59;		// javacard/framework/ISOException.throwIt(S)V
@@ -4569,8 +4569,8 @@
 		}
 
 		.method private resetBIP32Seed(Ljavacard/framework/APDU;[B)V {
-			.stack 8;
-			.locals 4;
+			.stack 9;
+			.locals 5;
 
 			.descriptor	Ljavacard/framework/APDU;	1.10;
 
@@ -4590,64 +4590,90 @@
 					sconst_2;
 					baload;
 					sstore 4;
-				L4:	getfield_a_this 24;		// reference org/satochip/applet/CardEdge.pins
+				L4:	aload_2;
+					sconst_5;
+					getfield_a_this 26;		// reference org/satochip/applet/CardEdge.recvBuffer
+					sconst_0;
+					sload_3;
+					invokestatic 123;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					getfield_a_this 24;		// reference org/satochip/applet/CardEdge.pins
 					sconst_0;
 					aaload;
 					astore 5;
-				L5:	sload_3;
-					sload 4;
-					if_scmpge L7;
-				L6:	sspush 26368;
-					invokestatic 59;		// javacard/framework/ISOException.throwIt(S)V
-				L7:	aload_0;
+				L5:	getstatic_a 108;		// reference org/satochip/applet/APIShim.TXT_LOGIN_STITLE
+					sconst_0;
+					getfield_a_this 27;		// reference org/satochip/applet/CardEdge.tmpBuffer
+					sconst_0;
+					getstatic_a 108;		// reference org/satochip/applet/APIShim.TXT_LOGIN_STITLE
+					arraylength;
+					invokestatic 123;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
+					pop;
+					getfield_a_this 27;		// reference org/satochip/applet/CardEdge.tmpBuffer
+					getstatic_a 108;		// reference org/satochip/applet/APIShim.TXT_LOGIN_STITLE
+					arraylength;
+					sconst_2;
+					ssub;
+					bspush 48;
+					bastore;
+					getstatic_a 139;		// reference org/satochip/applet/CardEdge.apishim
+					getstatic_a 107;		// reference org/satochip/applet/APIShim.TXT_LOGIN_USR_TITLE
+					sconst_0;
+					getstatic_a 107;		// reference org/satochip/applet/APIShim.TXT_LOGIN_USR_TITLE
+					arraylength;
+					getfield_a_this 27;		// reference org/satochip/applet/CardEdge.tmpBuffer
+					sconst_0;
+					getstatic_a 108;		// reference org/satochip/applet/APIShim.TXT_LOGIN_STITLE
+					arraylength;
 					aload_2;
-					sconst_5;
-					sload 4;
-					invokespecial 110;		// org/satochip/applet/CardEdge.CheckPINPolicy([BSB)Z
-					ifne L9;
-				L8:	sspush -25585;
-					invokestatic 59;		// javacard/framework/ISOException.throwIt(S)V
-				L9:	aload 5;
+					invokevirtual 109;		// pinInputUI([BSS[BSS[B)S
+					sstore 6;
+				L6:	aload 5;
 					invokevirtual 111;		// getTriesRemaining()B
-					ifne L11;
-				L10:	sspush -25588;
+					ifne L8;
+				L7:	sspush -25588;
 					invokestatic 59;		// javacard/framework/ISOException.throwIt(S)V
-				L11:	aload 5;
+				L8:	aload 5;
 					aload_2;
-					sconst_5;
-					sload 4;
+					sconst_0;
+					sload 6;
+					sspush 255;
+					sand;
+					s2b;
 					invokevirtual 112;		// check([BSB)Z
-					ifne L13;
-				L12:	aload_0;
+					ifne L10;
+				L9:	aload_0;
 					sconst_0;
 					invokespecial 154;		// org/satochip/applet/CardEdge.LogoutIdentity(B)V
 					sspush -25598;
 					invokestatic 59;		// javacard/framework/ISOException.throwIt(S)V
-				L13:	getfield_b_this 15;		// boolean org/satochip/applet/CardEdge.bip32_seeded
-					ifne L15;
-				L14:	sspush -25580;
+				L10:	getfield_b_this 15;		// boolean org/satochip/applet/CardEdge.bip32_seeded
+					ifne L12;
+				L11:	sspush -25580;
 					invokestatic 59;		// javacard/framework/ISOException.throwIt(S)V
-				L15:	getfield_b_this 17;		// boolean org/satochip/applet/CardEdge.needs_2FA
-					ifeq L21;
-				L16:	sconst_0;
+				L12:	getfield_b_this 17;		// boolean org/satochip/applet/CardEdge.needs_2FA
+					ifeq L18;
+				L13:	sconst_0;
 					sconst_5;
 					invokestatic 57;		// javacard/framework/Util.makeShort(BB)S
-					sstore 6;
-				L17:	sload 6;
+					sstore 7;
+				L14:	sload 7;
 					sload 4;
 					sadd;
-					sstore 6;
+					sstore 7;
 					sload_3;
 					sload 4;
 					ssub;
 					sstore_3;
 					sload_3;
 					bspush 20;
-					if_scmpge L19;
-				L18:	sspush 26368;
+					if_scmpge L16;
+				L15:	sspush 26368;
 					invokestatic 59;		// javacard/framework/ISOException.throwIt(S)V
-				L19:	getfield_a_this 26;		// reference org/satochip/applet/CardEdge.recvBuffer
+				L16:	getfield_a_this 26;		// reference org/satochip/applet/CardEdge.recvBuffer
 					sconst_0;
+					sload_3;
+					sadd;
 					bspush 64;
 					sconst_m1;
 					invokestatic 121;		// javacard/framework/Util.arrayFillNonAtomic([BSSB)S
@@ -4656,6 +4682,8 @@
 					sconst_1;
 					getfield_a_this 26;		// reference org/satochip/applet/CardEdge.recvBuffer
 					sconst_0;
+					sload_3;
+					sadd;
 					bspush 32;
 					invokestatic 123;		// javacard/framework/Util.arrayCopyNonAtomic([BS[BSS)S
 					pop;
@@ -4664,21 +4692,27 @@
 					bspush 20;
 					getfield_a_this 26;		// reference org/satochip/applet/CardEdge.recvBuffer
 					sconst_0;
+					sload_3;
+					sadd;
 					bspush 64;
 					getfield_a_this 26;		// reference org/satochip/applet/CardEdge.recvBuffer
 					bspush 64;
+					sload_3;
+					sadd;
 					invokestatic 142;		// org/satochip/applet/HmacSha160.computeHmacSha160([BSS[BSS[BS)S
 					pop;
-					aload_2;
-					sload 6;
+					getfield_a_this 26;		// reference org/satochip/applet/CardEdge.recvBuffer
+					sload 7;
 					getfield_a_this 26;		// reference org/satochip/applet/CardEdge.recvBuffer
 					bspush 64;
+					sload_3;
+					sadd;
 					bspush 20;
 					invokestatic 126;		// javacard/framework/Util.arrayCompare([BS[BSS)B
-					ifeq L21;
-				L20:	sspush -25589;
+					ifeq L18;
+				L17:	sspush -25589;
 					invokestatic 59;		// javacard/framework/ISOException.throwIt(S)V
-				L21:	getfield_a_this 28;		// reference org/satochip/applet/CardEdge.bip32_om
+				L18:	getfield_a_this 28;		// reference org/satochip/applet/CardEdge.bip32_om
 					invokevirtual 163;		// reset()S
 					pop;
 					aload_0;

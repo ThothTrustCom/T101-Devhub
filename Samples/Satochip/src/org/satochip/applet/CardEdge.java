@@ -1241,10 +1241,6 @@ public class CardEdge extends javacard.framework.Applet {
 	 * PIN0-PUK0-PIN1-PUK1 tries (4b) | need2FA (1b)]
 	 */
 	private void GetStatus(APDU apdu, byte[] buffer) {
-		// check that PIN[0] has been entered previously
-		// if (!pins[0].isValidated())
-		// ISOException.throwIt(SW_UNAUTHORIZED);
-
 		if (buffer[ISO7816.OFFSET_P1] != (byte) 0x00)
 			ISOException.throwIt(SW_INCORRECT_P1);
 		if (buffer[ISO7816.OFFSET_P2] != (byte) 0x00)
@@ -1293,9 +1289,9 @@ public class CardEdge extends javacard.framework.Applet {
 		if (bytesLeft != apdu.setIncomingAndReceive())
 			ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
-		// get seed bytesize (max 64 bytes)
+		// get seed bytesize
 		byte bip32_seedsize = buffer[ISO7816.OFFSET_P1];
-		if (bip32_seedsize < 0 || bip32_seedsize > 64)
+		if (bip32_seedsize < 0 || bip32_seedsize > 192)
 			ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
 
 		short offset = (short) ISO7816.OFFSET_CDATA;
@@ -1358,14 +1354,21 @@ public class CardEdge extends javacard.framework.Applet {
 
 		// check provided PIN
 		byte pin_size = buffer[ISO7816.OFFSET_P1];
+		
+		// Buffer to recvBuffer
+		Util.arrayCopyNonAtomic(buffer, (short) 5, recvBuffer, (short) 0, bytesLeft);	
+		
+		// PIN #0 verify
 		OwnerPIN pin = pins[(byte) 0x00];
-		if (bytesLeft < pin_size)
-			ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-		if (!CheckPINPolicy(buffer, ISO7816.OFFSET_CDATA, pin_size))
-			ISOException.throwIt(SW_INVALID_PARAMETER);
+		Util.arrayCopyNonAtomic(APIShim.TXT_LOGIN_STITLE, (short) 0, tmpBuffer, (short) 0,
+				(short) APIShim.TXT_LOGIN_STITLE.length);
+		tmpBuffer[(short) (APIShim.TXT_LOGIN_STITLE.length - 2)] = (byte) (0x30);
+		short pinBytesLen = apishim.pinInputUI(APIShim.TXT_LOGIN_USR_TITLE, (short) 0,
+				(short) APIShim.TXT_LOGIN_USR_TITLE.length, tmpBuffer, (short) 0,
+				(short) APIShim.TXT_LOGIN_STITLE.length, buffer);
 		if (pin.getTriesRemaining() == (byte) 0x00)
 			ISOException.throwIt(SW_IDENTITY_BLOCKED);
-		if (!pin.check(buffer, (short) ISO7816.OFFSET_CDATA, (byte) pin_size)) {
+		if (!pin.check(buffer, (short) 0, (byte) (pinBytesLen & 0xFF))) {
 			LogoutIdentity((byte) 0x00);
 			ISOException.throwIt(SW_AUTH_FAILED);
 		}
@@ -1384,11 +1387,11 @@ public class CardEdge extends javacard.framework.Applet {
 
 			// compute hmac(counter_2FA) and compare with value provided
 			// hmac of 64-bytes msg: ( authentikey-coordx(32b) | 32bytes 0xFF-padding)
-			Util.arrayFillNonAtomic(recvBuffer, (short) 0, (short) 64, (byte) 0xFF);
-			Util.arrayCopyNonAtomic(authentikey_pubkey, (short) 0x01, recvBuffer, (short) 0, BIP32_KEY_SIZE);
-			HmacSha160.computeHmacSha160(data2FA, OFFSET_2FA_HMACKEY, (short) 20, recvBuffer, (short) 0, (short) 64,
-					recvBuffer, (short) 64);
-			if (Util.arrayCompare(buffer, offset, recvBuffer, (short) 64, (short) 20) != 0)
+			Util.arrayFillNonAtomic(recvBuffer, (short) (0 + bytesLeft), (short) 64, (byte) 0xFF);
+			Util.arrayCopyNonAtomic(authentikey_pubkey, (short) 0x01, recvBuffer, (short) (0 + bytesLeft), BIP32_KEY_SIZE);
+			HmacSha160.computeHmacSha160(data2FA, OFFSET_2FA_HMACKEY, (short) 20, recvBuffer, (short) (0 + bytesLeft), (short) 64,
+					recvBuffer, (short) (64 + bytesLeft));
+			if (Util.arrayCompare(recvBuffer, offset, recvBuffer, (short) (64 + bytesLeft), (short) 20) != 0)
 				ISOException.throwIt(SW_SIGNATURE_INVALID);
 		}
 		// reset memory cache, bip32 flag and all data!
