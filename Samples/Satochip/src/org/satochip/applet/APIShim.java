@@ -9,7 +9,8 @@ import javacard.security.MessageDigest;
 public class APIShim {
 	private byte[] aocPin;
 	private byte[] nonceBuffer = JCSystem.makeTransientByteArray((short) 8, JCSystem.MEMORY_TYPE_TRANSIENT_RESET);
-	private byte[] appName = { (byte) 0x53, (byte) 0x61, (byte) 0x74, (byte) 0x6f, (byte) 0x43, (byte) 0x68, (byte) 0x69, (byte) 0x70 };
+	private byte[] appName = { (byte) 0x53, (byte) 0x61, (byte) 0x74, (byte) 0x6f, (byte) 0x43, (byte) 0x68,
+			(byte) 0x69, (byte) 0x70 };
 	public static final byte[] defaultExpiryTime = new byte[4];
 	private short aocPinMaxRetry = 5;
 	private byte[] tempBuf = null;
@@ -43,7 +44,9 @@ public class APIShim {
 	public static final byte[] TXT_CRYPT_OPS_TITLE = new byte[] { (byte) 0x43, (byte) 0x72, (byte) 0x79, (byte) 0x70,
 			(byte) 0x74, (byte) 0x20, (byte) 0x4f, (byte) 0x70, (byte) 0x73 };
 	public static final byte[] TXT_SIG_OPS_TITLE = new byte[] { (byte) 0x53, (byte) 0x69, (byte) 0x67, (byte) 0x6e,
-			(byte) 0x20, (byte) 0x4f, (byte) 0x70, (byte) 0x73 };
+			(byte) 0x20, (byte) 0x55, (byte) 0x6e, (byte) 0x6b, (byte) 0x6e };
+	public static final byte[] TXT_SEND_TXN_TITLE = new byte[] { (byte) 0x53, (byte) 0x65, (byte) 0x6e, (byte) 0x64,
+			(byte) 0x20, (byte) 0x54, (byte) 0x78, (byte) 0x6e };
 	public static final byte[] TXT_CRYPT_OPS = { (byte) 0x50, (byte) 0x72, (byte) 0x65, (byte) 0x73, (byte) 0x73,
 			(byte) 0x20, (byte) 0x4f, (byte) 0x4b, (byte) 0x20, (byte) 0x74, (byte) 0x6f, (byte) 0x20, (byte) 0x64,
 			(byte) 0x65, (byte) 0x63, (byte) 0x72, (byte) 0x79, (byte) 0x70, (byte) 0x74, (byte) 0x20, (byte) 0x64,
@@ -55,6 +58,11 @@ public class APIShim {
 			(byte) 0x69, (byte) 0x67, (byte) 0x6e, (byte) 0x20, (byte) 0x64, (byte) 0x61, (byte) 0x74, (byte) 0x61,
 			(byte) 0x20, (byte) 0x6f, (byte) 0x72, (byte) 0x20, (byte) 0x43, (byte) 0x20, (byte) 0x74, (byte) 0x6f,
 			(byte) 0x20, (byte) 0x61, (byte) 0x62, (byte) 0x6f, (byte) 0x72, (byte) 0x74, (byte) 0x2e };
+	public static final byte[] TXT_SEND_TXN_OPS = { (byte) 0x50, (byte) 0x72, (byte) 0x65, (byte) 0x73, (byte) 0x73,
+			(byte) 0x20, (byte) 0x4f, (byte) 0x4b, (byte) 0x20, (byte) 0x74, (byte) 0x6f, (byte) 0x20, (byte) 0x73,
+			(byte) 0x65, (byte) 0x6e, (byte) 0x64, (byte) 0x20, (byte) 0x74, (byte) 0x78, (byte) 0x6e, (byte) 0x20,
+			(byte) 0x6f, (byte) 0x72, (byte) 0x20, (byte) 0x43, (byte) 0x20, (byte) 0x74, (byte) 0x6f, (byte) 0x20,
+			(byte) 0x61, (byte) 0x62, (byte) 0x6f, (byte) 0x72, (byte) 0x74, (byte) 0x2e};
 	public static final byte[] TXT_LOGIN_PUK_TITLE = { (byte) 0x4c, (byte) 0x6f, (byte) 0x67, (byte) 0x69, (byte) 0x6e,
 			(byte) 0x20, (byte) 0x50, (byte) 0x55, (byte) 0x4B };
 	public static final byte[] TXT_LOGIN_USR_TITLE = { (byte) 0x4c, (byte) 0x6f, (byte) 0x67, (byte) 0x69, (byte) 0x6e,
@@ -66,6 +74,8 @@ public class APIShim {
 			(byte) 0x72, (byte) 0x74, (byte) 0x2e };
 	public static final byte[] TXT_LOGIN_STITLE = { (byte) 0x4c, (byte) 0x6f, (byte) 0x67, (byte) 0x69, (byte) 0x6e,
 			(byte) 0x20, (byte) 0x50, (byte) 0x69, (byte) 0x6e, (byte) 0x20, (byte) 0x23, (byte) 0x30, (byte) 0x3a };
+	public static final byte[] BCD_SIZE_PER_BYTES = { 0, 3, 5, 8, 10, 13, 15, 17, 20, 22, 25, 27, 29, 32, 34, 37, 39,
+			41, 44, 46, 49, 51, 53, 56, 58, 61, 63, 66, 68, 70, 73, 75, 78 };
 
 	public APIShim() {
 		aocPin = new byte[8];
@@ -91,7 +101,7 @@ public class APIShim {
 				(short) 4);
 		isProceed = CardEdge.api.createAOCContainer(apduBuffer[0], apduBuffer, (short) 1, (short) aocPin.length,
 				aocPinMaxRetry, apduBuffer, (short) (1 + aocPin.length), (short) appName.length, apduBuffer,
-				(short) (1 + aocPin.length + appName.length));		
+				(short) (1 + aocPin.length + appName.length));
 
 		// Finalize container
 		if (isProceed) {
@@ -199,4 +209,23 @@ public class APIShim {
 		b[offset] = (byte) ((s >> 8) & 0xFF);
 		b[(short) (offset + 1)] = (byte) (s & 0xFF);
 	}
+
+	public static short toDecimalASCII(byte[] uBigBuf, short uBigOff,
+            short uBigLen, byte[] decBuf, short decOff) {
+        short bcdDigits = (short) BCD_SIZE_PER_BYTES[uBigLen];
+        short byteValue, dividend, remainder;
+
+        for (short bcdIndex = 0; bcdIndex < bcdDigits; bcdIndex++) {
+            remainder = 0;
+            for (short uBigIndex = 0; uBigIndex < uBigLen; uBigIndex++) {
+                byteValue = (short) (uBigBuf[(short) (uBigOff + uBigIndex)] & 0xFF);
+                dividend = (short) (remainder * 256 + byteValue);
+                remainder = (short) (dividend % 10);
+                uBigBuf[(short) (uBigOff + uBigIndex)] = (byte) (dividend / 10);
+            }
+            decBuf[(short) (decOff + bcdDigits - bcdIndex - 1)] = (byte) (remainder + '0');
+        }
+
+        return bcdDigits;
+    }
 }

@@ -24,6 +24,7 @@
 
 package org.satochip.applet;
 
+import javacard.framework.ISOException;
 import javacard.framework.Util;
 
 /**
@@ -362,33 +363,39 @@ public class Transaction {
 			if (CardEdge.ctx[TX_STATE] == STATE_NONE) {
 				// nVersion
 				if (CardEdge.ctx2[REMAINING] < (short) 4) {
+					ISOException.throwIt(Util.makeShort((byte) 0x6F, (byte) 0x01));
 					return RESULT_ERROR;
 				}
 				consumeTransaction(buffer, (short) 4);
 				// hashPrevouts
 				if (CardEdge.ctx2[REMAINING] < (short) 32) {
+					ISOException.throwIt(Util.makeShort((byte) 0x6F, (byte) 0x02));
 					return RESULT_ERROR;
 				}
 				consumeTransaction(buffer, (short) 32);
 				// hashSequence
 				if (CardEdge.ctx2[REMAINING] < (short) 32) {
+					ISOException.throwIt(Util.makeShort((byte) 0x6F, (byte) 0x03));
 					return RESULT_ERROR;
 				}
 				consumeTransaction(buffer, (short) 32);
 
 				// parse outpoint: TxOutHash
 				if (CardEdge.ctx2[REMAINING] < (short) 32) {
+					ISOException.throwIt(Util.makeShort((byte) 0x6F, (byte) 0x04));
 					return RESULT_ERROR;
 				}
 				consumeTransaction(buffer, (short) 32);
 				// parse outpoint: TxOutHashIndex
 				if (CardEdge.ctx2[REMAINING] < (short) 4) {
+					ISOException.throwIt(Util.makeShort((byte) 0x6F, (byte) 0x05));
 					return RESULT_ERROR;
 				}
 				consumeTransaction(buffer, (short) 4);
 
 				// Read the script length
 				if (!parseVarint(buffer, CardEdge.ctx, TX_SCRIPT_REMAINING)) {
+					ISOException.throwIt(Util.makeShort((byte) 0x6F, (byte) 0x06));
 					return RESULT_ERROR;
 				}
 				CardEdge.ctx[TX_STATE] = STATE_HASHING_INPUT_SCRIPT;
@@ -423,6 +430,7 @@ public class Transaction {
 				}
 				// amount
 				if (CardEdge.ctx2[REMAINING] < (short) 8) {
+					ISOException.throwIt(Util.makeShort((byte) 0x6F, (byte) 0x07));
 					return RESULT_ERROR;
 				}
 				Biginteger.swap(buffer, CardEdge.ctx2[CURRENT], CardEdge.ctx, TX_TMP_BUFFER, (short) 8);
@@ -430,21 +438,25 @@ public class Transaction {
 				consumeTransaction(buffer, (short) 8);
 				// Sequence
 				if (CardEdge.ctx2[REMAINING] < (short) 4) {
+					ISOException.throwIt(Util.makeShort((byte) 0x6F, (byte) 0x08)); 
 					return RESULT_ERROR;
 				}
 				consumeTransaction(buffer, (short) 4);
 				// hashOutput
 				if (CardEdge.ctx2[REMAINING] < (short) 32) {
+					ISOException.throwIt(Util.makeShort((byte) 0x6F, (byte) 0x09));
 					return RESULT_ERROR;
 				}
-				consumeTransaction(buffer, (short) 32); // todo:enforce hashOutput
+				consumeTransaction(buffer, (short) 32); // todo:enforce hashOutput 
 				// nLocktime
 				if (CardEdge.ctx2[REMAINING] < (short) 4) {
+					ISOException.throwIt(Util.makeShort((byte) 0x6F, (byte) 0x0A));
 					return RESULT_ERROR;
 				}
 				consumeTransaction(buffer, (short) 4);
 				// nHashType
 				if (CardEdge.ctx2[REMAINING] < (short) 4) {
+					ISOException.throwIt(Util.makeShort((byte) 0x6F, (byte) 0x0B));
 					return RESULT_ERROR;
 				}
 				consumeTransaction(buffer, (short) 4);

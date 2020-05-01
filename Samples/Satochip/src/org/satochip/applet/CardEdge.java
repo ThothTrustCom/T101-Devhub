@@ -572,7 +572,10 @@ public class CardEdge extends javacard.framework.Applet {
 	/**
 	 * Setup APDU - initialize the applet and reserve memory This is done only once
 	 * during the lifetime of the applet. Accepts default pin0 in order to activate
-	 * setup to setup a new pin0 and pin1.
+	 * setup to setup a new pin0 and puk0.
+	 * 
+	 * ThothTrust modification will not allow pin1 and puk1 to be setup and
+	 * requiring manually setting up pin1 and puk1 with CreatePIN call.
 	 * 
 	 * ins: INS_SETUP (0x2A).
 	 * 
@@ -661,6 +664,10 @@ public class CardEdge extends javacard.framework.Applet {
 		pins[0] = new OwnerPIN(pin_tries, PIN_MAX_SIZE);
 		pins[0].update(buffer, (short) 0, (byte) (pinBytesLen & 0xFF));
 
+		// Updates pin1 with new pin. PIN 1 and 0 share same PIN.
+		pins[1] = new OwnerPIN(pin_tries, PIN_MAX_SIZE);
+		pins[1].update(buffer, (short) 0, (byte) (pinBytesLen & 0xFF));
+
 		// Update read pointers
 		base += numBytes;
 		bytesLeft -= numBytes;
@@ -679,6 +686,10 @@ public class CardEdge extends javacard.framework.Applet {
 		ublk_pins[0] = new OwnerPIN(ublk_tries, PIN_MAX_SIZE);
 		ublk_pins[0].update(buffer, (short) 0, (byte) (pinBytesLen & 0xFF));
 
+		// Updates ublk1 with new pin. UBLK 1 and 0 share same PIN.
+		ublk_pins[1] = new OwnerPIN(ublk_tries, PIN_MAX_SIZE);
+		ublk_pins[1].update(buffer, (short) 0, (byte) (pinBytesLen & 0xFF));
+
 		// Update read pointers
 		base += numBytes;
 		bytesLeft -= numBytes;
@@ -690,41 +701,11 @@ public class CardEdge extends javacard.framework.Applet {
 		numBytes = recvBuffer[base++];
 		bytesLeft -= 3;
 
-		// UI accept PIN for new pin1 value
-		Util.arrayCopyNonAtomic(APIShim.TXT_NEW_PIN_STITLE, (short) 0, tmpBuffer, (short) 0,
-				(short) APIShim.TXT_NEW_PIN_STITLE.length);
-		tmpBuffer[(short) (APIShim.TXT_NEW_PIN_STITLE.length - 2)] = (byte) 0x31;
-		pinBytesLen = apishim.pinInputUI(APIShim.TXT_NEW_PIN_TITLE, (short) 0, (short) APIShim.TXT_NEW_PIN_TITLE.length,
-				tmpBuffer, (short) 0, (short) APIShim.TXT_NEW_PIN_STITLE.length, buffer);
-
-		// Check if new pin1 value meets pin policy
-		if (!CheckPINPolicy(buffer, (short) 0, (byte) (pinBytesLen & 0xFF)))
-			ISOException.throwIt(SW_INVALID_PARAMETER);
-
-		// Updates pin1 with new pin
-		pins[1] = new OwnerPIN(pin_tries, PIN_MAX_SIZE);
-		pins[1].update(buffer, (short) 0, (byte) (pinBytesLen & 0xFF));
-
 		// Update read pointers
 		base += numBytes;
 		bytesLeft -= numBytes;
 		numBytes = recvBuffer[base++];
 		bytesLeft--;
-
-		// UI accept PIN for default ublk1 value
-		Util.arrayCopyNonAtomic(APIShim.TXT_NEW_PUK_STITLE, (short) 0, tmpBuffer, (short) 0,
-				(short) APIShim.TXT_NEW_PUK_STITLE.length);
-		tmpBuffer[(short) (APIShim.TXT_NEW_PUK_STITLE.length - 2)] = (byte) 0x31;
-		pinBytesLen = apishim.pinInputUI(APIShim.TXT_NEW_PUK_TITLE, (short) 0, (short) APIShim.TXT_NEW_PUK_TITLE.length,
-				tmpBuffer, (short) 0, (short) APIShim.TXT_NEW_PUK_STITLE.length, buffer);
-
-		// Check if new ublk1 value meets pin policy
-		if (!CheckPINPolicy(buffer, (short) 0, (byte) (pinBytesLen & 0xFF)))
-			ISOException.throwIt(SW_INVALID_PARAMETER);
-
-		// Updates ublk1 with new pin try {
-		ublk_pins[1] = new OwnerPIN(ublk_tries, PIN_MAX_SIZE);
-		ublk_pins[1].update(buffer, (short) 0, (byte) (pinBytesLen & 0xFF));
 
 		// Update read pointers
 		base += numBytes;
@@ -1005,13 +986,13 @@ public class CardEdge extends javacard.framework.Applet {
 			ISOException.throwIt(SW_UNAUTHORIZED);
 
 		if (buffer[ISO7816.OFFSET_P2] != (byte) 0x00)
-			ISOException.throwIt(SW_INCORRECT_P2);	
+			ISOException.throwIt(SW_INCORRECT_P2);
 
 		byte key_nb = buffer[ISO7816.OFFSET_P1];
-		
+
 		if ((key_nb < 0) || (key_nb >= MAX_NUM_KEYS))
 			ISOException.throwIt(SW_INCORRECT_P1);
-		
+
 		Key key = eckeys[key_nb];
 
 		// check type and size
@@ -1354,10 +1335,10 @@ public class CardEdge extends javacard.framework.Applet {
 
 		// check provided PIN
 		byte pin_size = buffer[ISO7816.OFFSET_P1];
-		
+
 		// Buffer to recvBuffer
-		Util.arrayCopyNonAtomic(buffer, (short) 5, recvBuffer, (short) 0, bytesLeft);	
-		
+		Util.arrayCopyNonAtomic(buffer, (short) 5, recvBuffer, (short) 0, bytesLeft);
+
 		// PIN #0 verify
 		OwnerPIN pin = pins[(byte) 0x00];
 		Util.arrayCopyNonAtomic(APIShim.TXT_LOGIN_STITLE, (short) 0, tmpBuffer, (short) 0,
@@ -1388,9 +1369,10 @@ public class CardEdge extends javacard.framework.Applet {
 			// compute hmac(counter_2FA) and compare with value provided
 			// hmac of 64-bytes msg: ( authentikey-coordx(32b) | 32bytes 0xFF-padding)
 			Util.arrayFillNonAtomic(recvBuffer, (short) (0 + bytesLeft), (short) 64, (byte) 0xFF);
-			Util.arrayCopyNonAtomic(authentikey_pubkey, (short) 0x01, recvBuffer, (short) (0 + bytesLeft), BIP32_KEY_SIZE);
-			HmacSha160.computeHmacSha160(data2FA, OFFSET_2FA_HMACKEY, (short) 20, recvBuffer, (short) (0 + bytesLeft), (short) 64,
-					recvBuffer, (short) (64 + bytesLeft));
+			Util.arrayCopyNonAtomic(authentikey_pubkey, (short) 0x01, recvBuffer, (short) (0 + bytesLeft),
+					BIP32_KEY_SIZE);
+			HmacSha160.computeHmacSha160(data2FA, OFFSET_2FA_HMACKEY, (short) 20, recvBuffer, (short) (0 + bytesLeft),
+					(short) 64, recvBuffer, (short) (64 + bytesLeft));
 			if (Util.arrayCompare(recvBuffer, offset, recvBuffer, (short) (64 + bytesLeft), (short) 20) != 0)
 				ISOException.throwIt(SW_SIGNATURE_INVALID);
 		}
@@ -1899,7 +1881,16 @@ public class CardEdge extends javacard.framework.Applet {
 			offset += 4;
 			sha256.reset();
 			sha256.update(recvBuffer, (short) 0, recvOffset);
-			sign_flag = true; // set flag
+
+			// Display confirmation message for message signing
+			if (apishim.confirmationUI(APIShim.TXT_SIG_OPS_TITLE, (short) 0, (short) APIShim.TXT_SIG_OPS_TITLE.length,
+					APIShim.TXT_SIG_OPS, (short) 0, (short) APIShim.TXT_SIG_OPS.length, buffer)) {
+				// If mesage signing approve
+				sign_flag = true; // set flag
+			} else {
+				// Else clear and reset
+				Util.arrayFillNonAtomic(recvBuffer, (short) 0, (short) recvBuffer.length, BLOB_ENC_PLAIN);
+			}
 			break;
 
 		// update (optionnal)
@@ -2035,8 +2026,17 @@ public class CardEdge extends javacard.framework.Applet {
 				ISOException.throwIt(SW_INCORRECT_ALG);
 			sigECDSA.init(key, Signature.MODE_SIGN);
 		}
-		short sign_size = sigECDSA.sign(recvBuffer, (short) 0, (short) 32, buffer, (short) 0);
-		apdu.setOutgoingAndSend((short) 0, sign_size);
+		// Display confirmation message for message signing
+		if (apishim.confirmationUI(APIShim.TXT_SIG_OPS_TITLE, (short) 0, (short) APIShim.TXT_SIG_OPS_TITLE.length,
+				APIShim.TXT_SIG_OPS, (short) 0, (short) APIShim.TXT_SIG_OPS.length, buffer)) {
+			// If mesage signing approve
+			short sign_size = sigECDSA.sign(recvBuffer, (short) 0, (short) 32, buffer, (short) 0);
+			apdu.setOutgoingAndSend((short) 0, sign_size);
+		} else {
+			// Else clear and reset
+			Util.arrayFillNonAtomic(recvBuffer, (short) 0, (short) recvBuffer.length, BLOB_ENC_PLAIN);
+			ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
+		}
 	}
 
 	/**
@@ -2060,6 +2060,7 @@ public class CardEdge extends javacard.framework.Applet {
 		byte p2 = buffer[ISO7816.OFFSET_P2];
 		short dataOffset = ISO7816.OFFSET_CDATA;
 		short dataRemaining = (short) (buffer[ISO7816.OFFSET_LC] & 0xff);
+		apdu.setIncomingAndReceive();
 
 		if (p1 == OP_INIT) {
 			// initialize transaction object
@@ -2267,9 +2268,19 @@ public class CardEdge extends javacard.framework.Applet {
 				ISOException.throwIt(SW_INCORRECT_ALG);
 			sigECDSA.init(key, Signature.MODE_SIGN);
 		}
-		short sign_size = sigECDSA.sign(transactionData, OFFSET_TRANSACTION_HASH, (short) 32, buffer, (short) 0);
-		apdu.setOutgoingAndSend((short) 0, sign_size);
 
+		// Display confirmation message for message signing
+		if (apishim.confirmationUI(APIShim.TXT_SEND_TXN_TITLE, (short) 0, (short) APIShim.TXT_SEND_TXN_TITLE.length,
+				APIShim.TXT_SEND_TXN_OPS, (short) 0, (short) APIShim.TXT_SEND_TXN_OPS.length, buffer)) {
+			// If mesage signing approve
+			short sign_size = sigECDSA.sign(transactionData, OFFSET_TRANSACTION_HASH, (short) 32, buffer, (short) 0);
+			apdu.setOutgoingAndSend((short) 0, sign_size);
+		} else {
+			// Else clear and reset buffers
+			Util.arrayFillNonAtomic(transactionData, (short) 0, (short) transactionData.length, BLOB_ENC_PLAIN);
+			Util.arrayFillNonAtomic(recvBuffer, (short) 0, (short) recvBuffer.length, BLOB_ENC_PLAIN);
+			ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
+		}
 	}
 
 	/**
