@@ -6,7 +6,7 @@ public interface T101OpenAPI extends Shareable {
 	
 	public static final short MAX_OBJ_PER_CRED = (short) 4;
     public static final short MAX_GLOBAL = (short) 2;
-    public static final short MAX_AOC = (short) 2;
+    public static final short MAX_AOC = (short) 4;
     public static final short MAX_USERS_PER_OBJ = (short) 3;
     public static final short MAX_LIST_OBJ_CNT = (short) 10;
     public static final short MAX_KMAC_LEN = (short) 128;

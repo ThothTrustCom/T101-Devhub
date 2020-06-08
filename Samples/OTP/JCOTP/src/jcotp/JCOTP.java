@@ -20,18 +20,26 @@ public class JCOTP extends Applet implements AppletEvent {
 	public static byte[] serverAID = new byte[] { (byte) 0x4B, (byte) 0x4D, (byte) 0x31, (byte) 0x30, (byte) 0x31,
 			(byte) 0x00 };
 	public short[] sb = JCSystem.makeTransientShortArray((short) 3, JCSystem.CLEAR_ON_RESET);
-	public byte[] TEXT_SETUP_COMPLETE = new byte[] { (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x20,
+	private byte[] TEXT_SETUP_COMPLETE = new byte[] { (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x20,
 			(byte) 0x53, (byte) 0x65, (byte) 0x74, (byte) 0x75, (byte) 0x70, (byte) 0x20, (byte) 0x20, (byte) 0x20,
 			(byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x43,
 			(byte) 0x6f, (byte) 0x6d, (byte) 0x70, (byte) 0x6c, (byte) 0x65, (byte) 0x74, (byte) 0x65, (byte) 0x20,
 			(byte) 0x20, (byte) 0x20, (byte) 0x20 };
-
-	public byte[] TEXT_FAILED = new byte[] { (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x4f, (byte) 0x70,
+	private byte[] TEXT_FAILED = new byte[] { (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x4f, (byte) 0x70,
 			(byte) 0x65, (byte) 0x72, (byte) 0x61, (byte) 0x74, (byte) 0x69, (byte) 0x6f, (byte) 0x6e, (byte) 0x20,
 			(byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x20, (byte) 0x46,
 			(byte) 0x61, (byte) 0x69, (byte) 0x6c, (byte) 0x65, (byte) 0x64, (byte) 0x20, (byte) 0x20, (byte) 0x20,
 			(byte) 0x20, (byte) 0x20 };
 	private byte[] TEXT_OTP = { (byte) 0x4f, (byte) 0x54, (byte) 0x50, (byte) 0x3a };
+	private byte[] TEXT_OTP_MENU_TITLE = { (byte) 0x4f, (byte) 0x54, (byte) 0x50, (byte) 0x20, (byte) 0x4d, (byte) 0x45,
+			(byte) 0x4e, (byte) 0x55 };
+	private byte[] TEXT_HELLOWORLD = { (byte) 0x48, (byte) 0x65, (byte) 0x6c, (byte) 0x6c, (byte) 0x6f, (byte) 0x20,
+			(byte) 0x57, (byte) 0x6f, (byte) 0x72, (byte) 0x6c, (byte) 0x64, (byte) 0x20, (byte) 0x21, (byte) 0x21,
+			(byte) 0x21 };
+	private byte[] TEXT_OTP_MENU_LIST = { (byte) 0x0c, (byte) 0x47, (byte) 0x65, (byte) 0x74, (byte) 0x20, (byte) 0x4f,
+			(byte) 0x54, (byte) 0x50, (byte) 0x20, (byte) 0x43, (byte) 0x6f, (byte) 0x64, (byte) 0x65, (byte) 0x0d,
+			(byte) 0x52, (byte) 0x65, (byte) 0x73, (byte) 0x65, (byte) 0x74, (byte) 0x20, (byte) 0x50, (byte) 0x72,
+			(byte) 0x6f, (byte) 0x66, (byte) 0x69, (byte) 0x6c, (byte) 0x65 };
 	public static byte[] b0;
 	private byte[] otpCtr;
 	private byte[] otpKey = null;
@@ -80,9 +88,9 @@ public class JCOTP extends Applet implements AppletEvent {
 				}
 			}
 		} else if ((buffer[ISO7816.OFFSET_CLA] == (byte) 0xB0) && (buffer[ISO7816.OFFSET_INS] == (byte) 0xFF)) {
-			initEnv(aocPin, (short) 0, (short) aocPin.length, appName, (short) 0, (short) appName.length,
-					admName, (short) 0, (short) admName.length, admPin, (short) 0, (short) admPin.length,
-					expTime, (short) 0, (short) 4, buffer);
+			initEnv(aocPin, (short) 0, (short) aocPin.length, appName, (short) 0, (short) appName.length, admName,
+					(short) 0, (short) admName.length, admPin, (short) 0, (short) admPin.length, expTime, (short) 0,
+					(short) 4, buffer);
 		} else if ((buffer[ISO7816.OFFSET_CLA] == (byte) 0xB0) && (buffer[ISO7816.OFFSET_INS] == (byte) 0x01)) {
 			// Receive OTP key from APDU
 			sb[0] = apdu.setIncomingAndReceive();
@@ -102,47 +110,7 @@ public class JCOTP extends Applet implements AppletEvent {
 				ISOException.throwIt(ISO7816.SW_DATA_INVALID);
 			}
 		} else if ((buffer[ISO7816.OFFSET_CLA] == (byte) 0xB0) && (buffer[ISO7816.OFFSET_INS] == (byte) 0x02)) {
-			// Clean up buffers
-			Util.arrayFillNonAtomic(b0, (short) 0, (short) b0.length, (byte) 0x00);
-			Util.arrayFillNonAtomic(otpCtr, (short) 0, (short) otpCtr.length, (byte) 0x00);
-
-			// RFC-6238
-			api.getTime(buffer, (short) 0);
-
-			// Convert device UNIX binary timestamp to integer
-			int time = ((buffer[0] & 0x7f) << 24) | ((buffer[1] & 0xff) << 16) | ((buffer[2] & 0xff) << 8)
-					| ((buffer[3] & 0xff) & 0xff);
-
-			// Steps calculation using default X = 30.
-			int steps = time / 30;
-
-			// Convert steps to OTP counter
-			Codec.intToBytes(otpCtr, (short) 4, steps);
-
-			if (otpKey != null) {
-				short send = HOTPEngine.generateOTP(hash, otpKey, (short) 0, (short) otpKey.length, otpCtr, (short) 0,
-						(short) otpCtr.length, b0, (short) 0, buffer, (short) 0);
-
-				// Fill with whitespace within buffer
-				Util.arrayFillNonAtomic(b0, (short) 0, (short) b0.length, (byte) 0x20);
-				
-				// OTP result to message
-				Util.arrayCopyNonAtomic(buffer, (short) 4, b0, (short) 37, (short) (send - 4));
-				
-				// 'OTP:' message				
-				Util.arrayCopyNonAtomic(TEXT_OTP, (short) 0, b0, (short) 0, (short) TEXT_OTP.length);
-				
-				// Render UI
-				uxRender(T101OpenAPI.UI_TYPE_TEXT, T101OpenAPI.NULL, T101OpenAPI.NULL, T101OpenAPI.NULL,
-						T101OpenAPI.NULL, TEXT_OTP, (short) 0, (short) (TEXT_OTP.length - 1), b0, (short) 0, (short) 48, aocPin,
-						(short) 0, (short) aocPin.length, b0, (short) 48, buffer);
-
-//				apdu.setOutgoing();
-//				apdu.setOutgoingLength((short) (send - 4));
-//				apdu.sendBytes((short) 4, (short) (send - 4));
-			} else {
-				ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
-			}
+			generateAndShowOTPCode(buffer);
 		} else if ((buffer[ISO7816.OFFSET_CLA] == (byte) 0xB0) && (buffer[ISO7816.OFFSET_INS] == (byte) 0x03)) {
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) otpKey.length);
@@ -156,6 +124,16 @@ public class JCOTP extends Applet implements AppletEvent {
 			apdu.setOutgoing();
 			apdu.setOutgoingLength((short) 256);
 			apdu.sendBytesLong(b0, (short) 0, (short) 256);
+		} else if ((buffer[ISO7816.OFFSET_CLA] == (byte) 0xB0) && (buffer[ISO7816.OFFSET_INS] == (byte) 0x10)) {
+			// Front panel controls
+			// Simply show a Hello World screen
+			if (buffer[ISO7816.OFFSET_INS] == (byte) 0x02) {
+				buffer[ISO7816.OFFSET_CDATA] = (byte) 0x01;
+				buffer[(short) (ISO7816.OFFSET_CDATA + 1)] = (byte) 0x01;
+				apdu.setOutgoingAndSend(ISO7816.OFFSET_CDATA, (short) 2);
+			} else {
+				doMainMenu(buffer);
+			}
 		} else {
 			ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
 		}
@@ -211,7 +189,13 @@ public class JCOTP extends Applet implements AppletEvent {
 				}
 			} else {
 				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0xa2));
+			}
 
+			// Change front panel administration to enabled
+			if (isProceed) {
+				isProceed = enableFPAccess(aocPin, aocPinOffset, aocPinLen, buffer);
+			} else {
+				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0xa3));
 			}
 
 			if (isProceed) {
@@ -219,7 +203,8 @@ public class JCOTP extends Applet implements AppletEvent {
 						T101OpenAPI.NULL, TEXT_SETUP_COMPLETE, (short) 5, (short) 5, TEXT_SETUP_COMPLETE, (short) 0,
 						(short) TEXT_SETUP_COMPLETE.length, aocPin, aocPinOffset, aocPinLen, b0, (short) 0, buffer);
 			} else {
-				ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
+				// ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
+				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0xff));
 			}
 		}
 	}
@@ -280,26 +265,46 @@ public class JCOTP extends Applet implements AppletEvent {
 		return false;
 	}
 
+	public boolean enableFPAccess(byte[] aocPin, short aocPinOffset, short aocPinLen, byte[] buffer) {
+		buffer[0] = T101OpenAPI.CRED_FIELD_MANAGEMENT;
+		buffer[1] = T101OpenAPI.CRED_MGMT_FRONT_PANEL;
+		if (api.manageAOCContainer(buffer[0], buffer, (short) 1, (short) 1, buffer, (short) 2)) {
+			Util.arrayCopyNonAtomic(buffer, (short) 2, b0, (short) 0, (short) 8);
+			if (authContainer(aocPin, aocPinOffset, aocPinLen, b0, (short) 0, buffer) == 1) {
+				return true;
+			} else {
+				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x17));
+			}
+		} else {
+			ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x16));
+		}
+		return false;
+	}
+
 	public short uxRender(byte type, byte subMode, byte subMode1, byte subMode2, byte subMode3, byte[] title,
 			short titleOffset, short titleLen, byte[] input, short inOffset, short inLen, byte[] aocPin,
 			short aocPinOffset, short aocPinLen, byte[] compBuff, short compBuffOff, byte[] buffer) {
 		buffer[0] = type;
+		buffer[1] = subMode;
+		buffer[2] = subMode1;
+		buffer[3] = subMode2;
+		buffer[4] = subMode3;
 		sb[1] = (short) 0;
 		sb[2] = (short) 0;
 		if (title != null && titleLen > 0) {
-			Util.arrayCopyNonAtomic(title, titleOffset, buffer, (short) 1, titleLen);
+			Util.arrayCopyNonAtomic(title, titleOffset, buffer, (short) 5, titleLen);
 			sb[1] = titleLen;
 		}
 
 		if (input != null && inLen > 0) {
-			Util.arrayCopyNonAtomic(input, inOffset, buffer, (short) (1 + sb[1]), inLen);
+			Util.arrayCopyNonAtomic(input, inOffset, buffer, (short) (5 + sb[1]), inLen);
 			sb[2] = inLen;
 		}
 
-		sb[0] = api.uiSession(buffer[0], subMode, subMode1, subMode2, subMode3, buffer, (short) 1, sb[1], buffer,
-				(short) (1 + sb[1]), sb[2], buffer, (short) (1 + sb[1] + sb[2]));
+		sb[0] = api.uiSession(buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer, (short) 5, sb[1], buffer,
+				(short) (5 + sb[1]), sb[2], buffer, (short) (5 + sb[1] + sb[2]));
 		if (sb[0] != -1) {
-			Util.arrayCopyNonAtomic(buffer, (short) (1 + sb[1] + sb[2]), compBuff, compBuffOff, (short) 8);
+			Util.arrayCopyNonAtomic(buffer, (short) (5 + sb[1] + sb[2]), compBuff, compBuffOff, (short) 8);
 			sb[0] = authContainer(aocPin, aocPinOffset, aocPinLen, compBuff, compBuffOff, buffer);
 			if (sb[0] > -1) {
 				return sb[0];
@@ -310,5 +315,72 @@ public class JCOTP extends Applet implements AppletEvent {
 			ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0xc1));
 		}
 		return (short) -1;
+	}
+
+	public void generateAndShowOTPCode(byte[] buffer) {
+		// Clean up buffers
+		Util.arrayFillNonAtomic(b0, (short) 0, (short) b0.length, (byte) 0x00);
+		Util.arrayFillNonAtomic(otpCtr, (short) 0, (short) otpCtr.length, (byte) 0x00);
+
+		// RFC-6238
+		api.getTime(buffer, (short) 0);
+
+		// Convert device UNIX binary timestamp to integer
+		int time = ((buffer[0] & 0x7f) << 24) | ((buffer[1] & 0xff) << 16) | ((buffer[2] & 0xff) << 8)
+				| ((buffer[3] & 0xff) & 0xff);
+
+		// Steps calculation using default X = 30.
+		int steps = time / 30;
+
+		// Convert steps to OTP counter
+		Codec.intToBytes(otpCtr, (short) 4, steps);
+
+		if (otpKey != null) {
+			short send = HOTPEngine.generateOTP(hash, otpKey, (short) 0, (short) otpKey.length, otpCtr, (short) 0,
+					(short) otpCtr.length, b0, (short) 0, buffer, (short) 0);
+
+			// Fill with whitespace within buffer
+			Util.arrayFillNonAtomic(b0, (short) 0, (short) b0.length, (byte) 0x20);
+
+			// OTP result to message
+			Util.arrayCopyNonAtomic(buffer, (short) 4, b0, (short) 37, (short) (send - 4));
+
+			// 'OTP:' message
+			Util.arrayCopyNonAtomic(TEXT_OTP, (short) 0, b0, (short) 0, (short) TEXT_OTP.length);
+
+			// Render UI
+			uxRender(T101OpenAPI.UI_TYPE_TEXT, T101OpenAPI.NULL, T101OpenAPI.NULL, T101OpenAPI.NULL, T101OpenAPI.NULL,
+					TEXT_OTP, (short) 0, (short) (TEXT_OTP.length - 1), b0, (short) 0, (short) 48, aocPin, (short) 0,
+					(short) aocPin.length, b0, (short) 48, buffer);
+		} else {
+			uxRender(T101OpenAPI.UI_TYPE_TEXT, T101OpenAPI.NULL, T101OpenAPI.NULL, T101OpenAPI.NULL, T101OpenAPI.NULL,
+					TEXT_OTP, (short) 0, (short) (TEXT_OTP.length - 1), TEXT_FAILED, (short) 0,
+					(short) TEXT_FAILED.length, aocPin, (short) 0, (short) aocPin.length, b0, (short) 0, buffer);
+			ISOException.throwIt(ISO7816.SW_SECURITY_STATUS_NOT_SATISFIED);
+		}
+	}
+
+	public void doMainMenu(byte[] buffer) {
+		// Render List with following options
+		// Option 1.) Get OTP Code
+		// Option 2.) Reset Profile
+		while (true) {
+			if (uxRender(T101OpenAPI.UI_TYPE_LIST, (byte) 0xFF, (byte) 0x02, T101OpenAPI.NULL, T101OpenAPI.NULL,
+					TEXT_OTP_MENU_TITLE, (short) 0, (short) TEXT_OTP_MENU_TITLE.length, TEXT_OTP_MENU_LIST, (short) 0,
+					(short) TEXT_OTP_MENU_LIST.length, aocPin, (short) 0, (short) aocPin.length, b0, (short) 0,
+					buffer) == 2) {
+				if (buffer[0] == 0x01) {
+					if (buffer[1] == 0x00) {
+						// Detected option to 1.) Get OTP Code
+						generateAndShowOTPCode(buffer);
+					} else if (buffer[1] == 0x01) {
+						// Detected option to 2.) Reset Profile
+						// Reset key
+						Util.arrayFillNonAtomic(otpKey, (short) 0, (short) otpKey.length, (byte) 0x00);
+						otpKey = null;
+					}
+				}
+			}
+		}
 	}
 }
