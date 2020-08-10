@@ -103,6 +103,27 @@ public class BPECC extends Applet {
 			len = ecdsaSigner.sign(buffer, apdu.getOffsetCdata(), len, buffer, apdu.getOffsetCdata());
 			apdu.setOutgoingAndSend(apdu.getOffsetCdata(), len);
 			break;
+		case (byte) 0x04:
+			// Load your own keypair
+			len = apdu.setIncomingAndReceive();
+			if (len != 97) {
+				ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
+			}
+			privKey.clearKey();
+			pubKey.clearKey();
+			setCurveParameters(privKey);
+			setCurveParameters(pubKey);
+			try {
+				privKey.setS(buffer, apdu.getOffsetCdata(), (short) 32);
+			} catch (Exception e) {
+				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x01));
+			}
+			try {
+				pubKey.setW(buffer, (short) (apdu.getOffsetCdata() + 32), (short) 65);
+			} catch (Exception e) {
+				ISOException.throwIt(Util.makeShort((byte) 0x6f, (byte) 0x02));
+			}
+			break;
 		default:
 			ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
 			break;
