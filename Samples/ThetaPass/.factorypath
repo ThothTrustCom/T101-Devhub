@@ -1,0 +1,4 @@
+<factorypath>
+    <factorypathentry kind="VARJAR" id="JC_304_HOME/lib/tools.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="JC_304_HOME/lib/api_classic_annotations.jar" enabled="true" runInBatchMode="false"/>
+</factorypath>
