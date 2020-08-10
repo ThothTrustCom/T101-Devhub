@@ -1,0 +1,309 @@
+// converted by version  [v3.0.4]
+// on Mon Aug 10 11:01:51 SGT 2020
+
+.package bpecc {
+	.aid 0x55:0x55:0x55:0x55:0x55;
+	.version 1.0;
+
+	.imports {
+		0xA0:0x0:0x0:0x0:0x62:0x1:0x1 1.5;		//javacard/framework
+		0xA0:0x0:0x0:0x0:0x62:0x1:0x2 1.5;		//javacard/security
+		0xA0:0x0:0x0:0x0:0x62:0x0:0x1 1.0;		//java/lang
+	}
+
+	.applet {
+		0x55:0x55:0x55:0x55:0x55:0x1:0x0 BPECC;
+	}
+
+	.constantPool {
+		// 0
+		instanceFieldRef 1.18 BPECC/privKey;
+		// 1
+		instanceFieldRef 1.19 BPECC/pubKey;
+		// 2
+		instanceFieldRef 1.16 BPECC/kp;
+		// 3
+		instanceFieldRef 1.15 BPECC/ecdsaSigner;
+		// 4
+		.classRef 1.18;		// javacard/security/ECPrivateKey
+		// 5
+		staticMethodRef BPECC/<init>()V;
+		// 6
+		.classRef 1.19;		// javacard/security/ECPublicKey
+		// 7
+		.classRef BPECC;
+		// 8
+		virtualMethodRef BPECC/setCurveParameters(Ljavacard/security/ECKey;)V;
+			.descriptor	Ljavacard/security/ECKey;	1.17;
+
+		// 9
+		.classRef 1.16;		// javacard/security/KeyPair
+		// 10
+		staticMethodRef 1.16.1(Ljavacard/security/PublicKey;Ljavacard/security/PrivateKey;)V;		// javacard/security/KeyPair.<init>(Ljavacard/security/PublicKey;Ljavacard/security/PrivateKey;)V
+			.descriptor	Ljavacard/security/PublicKey;	1.3;
+			.descriptor	Ljavacard/security/PrivateKey;	1.2;
+
+		// 11
+		staticMethodRef 0.3.0()V;		// javacard/framework/Applet.<init>()V
+		// 12
+		virtualMethodRef 1.16.1()V;		// genKeyPair()V
+		// 13
+		staticMethodRef 1.15.0(BZ)Ljavacard/security/Signature;;		// javacard/security/Signature.getInstance(BZ)Ljavacard/security/Signature;
+			.descriptor	Ljavacard/security/Signature;	1.15;
+
+		// 14
+		staticMethodRef 1.13.0(BSZ)Ljavacard/security/Key;;		// javacard/security/KeyBuilder.buildKey(BSZ)Ljavacard/security/Key;
+			.descriptor	Ljavacard/security/Key;	1.0;
+
+		// 15
+		virtualMethodRef 0.3.1()V;		// register()V
+		// 16
+		virtualMethodRef 0.3.3()Z;		// selectingApplet()Z
+		// 17
+		virtualMethodRef 0.10.1()[B;		// getBuffer()[B
+		// 18
+		staticMethodRef 0.7.1(S)V;		// javacard/framework/ISOException.throwIt(S)V
+		// 19
+		virtualMethodRef 0.10.8(SS)V;		// setOutgoingAndSend(SS)V
+		// 20
+		virtualMethodRef 0.10.6()S;		// setIncomingAndReceive()S
+		// 21
+		virtualMethodRef 1.15.3(Ljavacard/security/Key;B)V;		// init(Ljavacard/security/Key;B)V
+			.descriptor	Ljavacard/security/Key;	1.0;
+
+		// 22
+		virtualMethodRef 0.10.16()S;		// getOffsetCdata()S
+		// 23
+		virtualMethodRef 1.15.5([BSS[BS)S;		// sign([BSS[BS)S
+		// 24
+		staticFieldRef byte[] BPECC/A;
+		// 25
+		.classRef 1.17;		// javacard/security/ECKey
+		// 26
+		staticFieldRef byte[] BPECC/B;
+		// 27
+		staticFieldRef byte[] BPECC/FP;
+		// 28
+		staticFieldRef byte[] BPECC/G;
+		// 29
+		staticFieldRef byte[] BPECC/R;
+	}
+
+	.class public BPECC 0 extends 0.3 {		// extends javacard/framework/Applet
+
+		.fields {
+			private 1.16 kp 0;		// Ljavacard/security/KeyPair;
+			private 1.18 privKey 1;		// Ljavacard/security/ECPrivateKey;
+			private 1.19 pubKey 2;		// Ljavacard/security/ECPublicKey;
+			private 1.15 ecdsaSigner 3;		// Ljavacard/security/Signature;
+			protected static byte[] A 0 = {125,90,9,117,-4,44,48,87,-18,-10,117,48,65,122,-1,-25,-5,-128,85,-63,38,-36,92,108,-23,74,75,68,-13,48,-75,-39};		// [B
+			protected static byte[] B 1 = {38,-36,92,108,-23,74,75,68,-13,48,-75,-39,-69,-41,124,-65,-107,-124,22,41,92,-9,-31,-50,107,-52,-36,24,-1,-116,7,-74};		// [B
+			protected static byte[] G 2 = {4,-117,-46,-82,-71,-53,126,87,-53,44,75,72,47,-4,-127,-73,-81,-71,-34,39,-31,-29,-67,35,-62,58,68,83,-67,-102,-50,50,98,84,126,-8,53,-61,-38,-60,-3,-105,-8,70,26,20,97,29,-55,-62,119,69,19,45,-19,-114,84,92,29,84,-57,47,4,105,-105};		// [B
+			protected static byte[] R 3 = {-87,-5,87,-37,-95,-18,-87,-68,62,102,10,-112,-99,-125,-115,113,-116,57,122,-93,-75,97,-90,-9,-112,30,14,-126,-105,72,86,-89};		// [B
+			protected static byte[] FP 4 = {-87,-5,87,-37,-95,-18,-87,-68,62,102,10,-112,-99,-125,-115,114,110,59,-10,35,-43,38,32,40,32,19,72,29,31,110,83,119};		// [B
+			static final byte K = 1;		// B
+			static final short KEY_SIZE = 256;		// S
+		}
+
+		.publicMethodTable 7 {
+			equals(Ljava/lang/Object;)Z;
+			register()V;
+			register([BSB)V;
+			selectingApplet()Z;
+			deselect()V;
+			getShareableInterfaceObject(Ljavacard/framework/AID;B)Ljavacard/framework/Shareable;;
+			select()Z;
+			process(Ljavacard/framework/APDU;)V;
+			setCurveParameters(Ljavacard/security/ECKey;)V;
+		}
+
+		.packageMethodTable 0 {
+		}
+
+		.method public static install([BSB)V 0 {
+			.stack 1;
+			.locals 0;
+
+				L0:	new 7;		// bpecc/BPECC
+					invokespecial 5;		// bpecc/BPECC.<init>()V
+					return;
+		}
+
+		.method protected <init>()V 1 {
+			.stack 5;
+			.locals 0;
+
+				L0:	aload_0;
+					invokespecial 11;		// javacard/framework/Applet.<init>()V
+					aload_0;
+					bspush 12;
+					sspush 256;
+					sconst_0;
+					invokestatic 14;		// javacard/security/KeyBuilder.buildKey(BSZ)Ljavacard/security/Key;
+					checkcast 0 4;		// T_CLASSORINTERFACE javacard/security/ECPrivateKey
+					putfield_a 0;		// reference bpecc/BPECC.privKey
+					aload_0;
+					bspush 11;
+					sspush 256;
+					sconst_0;
+					invokestatic 14;		// javacard/security/KeyBuilder.buildKey(BSZ)Ljavacard/security/Key;
+					checkcast 0 6;		// T_CLASSORINTERFACE javacard/security/ECPublicKey
+					putfield_a 1;		// reference bpecc/BPECC.pubKey
+					aload_0;
+					getfield_a_this 0;		// reference bpecc/BPECC.privKey
+					invokevirtual 8;		// setCurveParameters(Ljavacard/security/ECKey;)V
+					aload_0;
+					getfield_a_this 1;		// reference bpecc/BPECC.pubKey
+					invokevirtual 8;		// setCurveParameters(Ljavacard/security/ECKey;)V
+					aload_0;
+					new 9;		// javacard/security/KeyPair
+					dup;
+					getfield_a_this 1;		// reference bpecc/BPECC.pubKey
+					getfield_a_this 0;		// reference bpecc/BPECC.privKey
+					invokespecial 10;		// javacard/security/KeyPair.<init>(Ljavacard/security/PublicKey;Ljavacard/security/PrivateKey;)V
+					putfield_a 2;		// reference bpecc/BPECC.kp
+					getfield_a_this 2;		// reference bpecc/BPECC.kp
+					invokevirtual 12;		// genKeyPair()V
+					aload_0;
+					bspush 33;
+					sconst_0;
+					invokestatic 13;		// javacard/security/Signature.getInstance(BZ)Ljavacard/security/Signature;
+					putfield_a 3;		// reference bpecc/BPECC.ecdsaSigner
+					aload_0;
+					invokevirtual 15;		// register()V
+					return;
+		}
+
+		.method public process(Ljavacard/framework/APDU;)V 7 {
+			.stack 6;
+			.locals 3;
+
+			.descriptor	Ljavacard/framework/APDU;	0.10;
+
+				L0:	aload_0;
+					invokevirtual 16;		// selectingApplet()Z
+					ifeq L2;
+				L1:	return;
+				L2:	aload_1;
+					invokevirtual 17;		// getBuffer()[B
+					astore_2;
+				L3:	aload_2;
+					sconst_1;
+					baload;
+					sstore_3;
+				L4:	sconst_0;
+					sstore 4;
+				L5:	sload_3;
+					stableswitch L16 0 3 L6 L13 L14 L15;
+				L6:	getfield_a_this 0;		// reference bpecc/BPECC.privKey
+					ifnull L12;
+				L7:	getfield_a_this 1;		// reference bpecc/BPECC.pubKey
+					ifnull L12;
+				L8:	getfield_a_this 0;		// reference bpecc/BPECC.privKey
+					invokeinterface 1 4 3;		// javacard/security/ECPrivateKey
+					ifeq L11;
+				L9:	getfield_a_this 1;		// reference bpecc/BPECC.pubKey
+					invokeinterface 1 6 3;		// javacard/security/ECPublicKey
+					ifeq L11;
+				L10:	sspush -28672;
+					invokestatic 18;		// javacard/framework/ISOException.throwIt(S)V
+					goto L17;
+				L11:	sspush 27013;
+					invokestatic 18;		// javacard/framework/ISOException.throwIt(S)V
+					goto L17;
+				L12:	sspush 27013;
+					invokestatic 18;		// javacard/framework/ISOException.throwIt(S)V
+					goto L17;
+				L13:	getfield_a_this 1;		// reference bpecc/BPECC.pubKey
+					aload_2;
+					sconst_0;
+					invokeinterface 3 6 19;		// javacard/security/ECPublicKey
+					sstore 4;
+					aload_1;
+					sconst_0;
+					sload 4;
+					invokevirtual 19;		// setOutgoingAndSend(SS)V
+					goto L17;
+				L14:	getfield_a_this 0;		// reference bpecc/BPECC.privKey
+					aload_2;
+					sconst_0;
+					invokeinterface 3 4 19;		// javacard/security/ECPrivateKey
+					sstore 4;
+					aload_1;
+					sconst_0;
+					sload 4;
+					invokevirtual 19;		// setOutgoingAndSend(SS)V
+					goto L17;
+				L15:	aload_1;
+					invokevirtual 20;		// setIncomingAndReceive()S
+					sstore 4;
+					getfield_a_this 3;		// reference bpecc/BPECC.ecdsaSigner
+					getfield_a_this 0;		// reference bpecc/BPECC.privKey
+					sconst_1;
+					invokevirtual 21;		// init(Ljavacard/security/Key;B)V
+					getfield_a_this 3;		// reference bpecc/BPECC.ecdsaSigner
+					aload_2;
+					aload_1;
+					invokevirtual 22;		// getOffsetCdata()S
+					sload 4;
+					aload_2;
+					aload_1;
+					invokevirtual 22;		// getOffsetCdata()S
+					invokevirtual 23;		// sign([BSS[BS)S
+					sstore 4;
+					aload_1;
+					aload_1;
+					invokevirtual 22;		// getOffsetCdata()S
+					sload 4;
+					invokevirtual 19;		// setOutgoingAndSend(SS)V
+					goto L17;
+				L16:	sspush 27904;
+					invokestatic 18;		// javacard/framework/ISOException.throwIt(S)V
+				L17:	return;
+		}
+
+		.method public setCurveParameters(Ljavacard/security/ECKey;)V 8 {
+			.stack 4;
+			.locals 0;
+
+			.descriptor	Ljavacard/security/ECKey;	1.17;
+
+				L0:	aload_1;
+					getstatic_a 24;		// reference bpecc/BPECC.A
+					sconst_0;
+					getstatic_a 24;		// reference bpecc/BPECC.A
+					arraylength;
+					invokeinterface 4 25 3;		// javacard/security/ECKey
+					aload_1;
+					getstatic_a 26;		// reference bpecc/BPECC.B
+					sconst_0;
+					getstatic_a 26;		// reference bpecc/BPECC.B
+					arraylength;
+					invokeinterface 4 25 4;		// javacard/security/ECKey
+					aload_1;
+					getstatic_a 27;		// reference bpecc/BPECC.FP
+					sconst_0;
+					getstatic_a 27;		// reference bpecc/BPECC.FP
+					arraylength;
+					invokeinterface 4 25 0;		// javacard/security/ECKey
+					aload_1;
+					getstatic_a 28;		// reference bpecc/BPECC.G
+					sconst_0;
+					getstatic_a 28;		// reference bpecc/BPECC.G
+					arraylength;
+					invokeinterface 4 25 5;		// javacard/security/ECKey
+					aload_1;
+					getstatic_a 29;		// reference bpecc/BPECC.R
+					sconst_0;
+					getstatic_a 29;		// reference bpecc/BPECC.R
+					arraylength;
+					invokeinterface 4 25 6;		// javacard/security/ECKey
+					aload_1;
+					sconst_1;
+					invokeinterface 2 25 7;		// javacard/security/ECKey
+					return;
+		}
+
+	}
+
+}

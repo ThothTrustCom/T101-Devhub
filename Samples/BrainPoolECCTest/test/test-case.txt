@@ -1,0 +1,16 @@
+CLA,INS,P1,P2,LC   Content              LE  SW   Response
+================================================================================
+00A4040005         5555555555              9000 // Card select OK
+0000000000                                 9000 // Check keys OK
+0001000000                              FF 9000 0461A22C35A484ECB751C8DBAB1F033C // Card BrainPool Public Key
+                                                414F134DE21F05BB05766EFC19259FD0 // Uncompressed
+								                8306847F09D01CF4B0180AA4A73B7C4B
+										        C7FF3892D26D141512BF72EB529D1439
+										        AD
+0002000000                              FF 9000 10A17589365CBC6B5AA138FEC165578C // Secret Key
+                                                4D375F562611640527F37682CA555930
+0003000000         68656C6C6F776F726C64 FF 9000 30450221008E62F74A4087B0282692F1 // BrainPool Signature
+                                                5459DA0F10154EAA2C7E91B3BCA39E50
+												ED471683E60220486A4E8D483F317AE7
+												B69A38CDF42C5DE77940755533BE9DAB
+												F4FFEAA8C460DD
