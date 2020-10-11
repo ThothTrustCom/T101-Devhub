@@ -20,6 +20,11 @@ applets or to re-use existing off-the-shelf JavaCard applets with minimal change
 fully utilize the security framework and capabilities provided by the THETAKey T101 OpenAPI to fully realize and utilize the THETAKey's 
 smart card functionalities.
 
+### Licenses and Intellectual Properties Notices ###
+This code repository abides by BSD-3 Clause license found in [LICENSE](LICENSE) file.
+
+The APIs, documents, notes, markdown files, text files and all files are copyleft and available to everyone openly and freely. Replication, use and production are freely allowed as long as the BSD-3 Clause license is applicable whenever possible for the source codes available in this code repository.
+
 ## Product Naming Convention ##
 
 The T101 product code designation for the THETAKey product denotes the first variant of the THETAKey smart card and subsequent variant 
